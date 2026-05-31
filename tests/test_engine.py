@@ -7,22 +7,15 @@ unique destination paths, event emission, and cancellation.
 
 from __future__ import annotations
 
-import math
 import threading
 from pathlib import Path
-from typing import List
-from unittest.mock import MagicMock, patch
-
-import numpy as np
-import pytest
-from numpy.typing import NDArray
 
 from imprint.config import AnalysisSettings, PathSettings
 from imprint.engine import SorterEngine
 from imprint.events import EngineEvent, EventType, MessageLevel
 
 # Import fixtures from conftest
-from tests.conftest import MockFace, MockFaceAnalyser
+from tests.conftest import MockFaceAnalyser
 
 
 class TestScoreSubfolder:
@@ -56,7 +49,7 @@ class TestScoreSubfolder:
     def test_formatting_precision(self) -> None:
         """Output should always have 3 decimal places."""
         result = SorterEngine._score_subfolder(0.1, 0.05, 10)
-        assert "Score_0.100_to_0.150" == result
+        assert result == "Score_0.100_to_0.150"
 
 
 class TestUniqueDestPath:
@@ -71,7 +64,7 @@ class TestUniqueDestPath:
     def test_duplicate_gets_suffix(self, tmp_path: Path) -> None:
         """Second occurrence should get a _1 suffix."""
         used: dict[Path, int] = {}
-        first = SorterEngine._unique_dest_path(tmp_path, "photo.jpg", used)
+        SorterEngine._unique_dest_path(tmp_path, "photo.jpg", used)
         second = SorterEngine._unique_dest_path(tmp_path, "photo.jpg", used)
         assert second == tmp_path / "photo_1.jpg"
 

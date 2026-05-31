@@ -19,7 +19,7 @@ import math
 import shutil
 import threading
 from pathlib import Path
-from typing import Callable, List, Optional, Protocol, Sequence, runtime_checkable
+from typing import Callable, Protocol, runtime_checkable
 
 import cv2
 import numpy as np
@@ -32,7 +32,7 @@ from imprint.constants import (
     ONNX_PROVIDERS,
     SUPPORTED_EXTENSIONS,
 )
-from imprint.events import EngineEvent, EventType, MessageLevel
+from imprint.events import EngineEvent, MessageLevel
 from imprint.math_utils import (
     cosine_distance,
     cosine_distance_matrix,
@@ -481,10 +481,7 @@ class SorterEngine:
         Returns:
             A string like ``Score_0.000_to_0.050``.
         """
-        if distance == 0:
-            bin_index = 0
-        else:
-            bin_index = math.floor(distance / step_size)
+        bin_index = 0 if distance == 0 else math.floor(distance / step_size)
         bin_index = min(bin_index, num_subfolders - 1)
 
         lower = bin_index * step_size

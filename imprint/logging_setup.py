@@ -12,7 +12,6 @@ import logging
 import queue
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Optional
 
 
 class QueueHandler(logging.Handler):
@@ -48,7 +47,7 @@ class QueueHandler(logging.Handler):
 
 def configure_logging(
     log_queue: queue.Queue[str],
-    log_dir: Optional[Path] = None,
+    log_dir: Path | None = None,
     level: int = logging.INFO,
 ) -> logging.Logger:
     """Configure the application-wide logger.

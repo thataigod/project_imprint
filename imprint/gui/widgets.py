@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import tkinter as tk
 from tkinter import filedialog, ttk
-from typing import Callable, Optional
+from typing import Callable
 
 from imprint.gui.tooltips import ToolTip
 
@@ -36,7 +36,7 @@ class PathSelector(ttk.Frame):
         parent: tk.Widget,
         label_text: str,
         dialog_title: str = "Select Folder",
-        tooltip_text: Optional[str] = None,
+        tooltip_text: str | None = None,
     ) -> None:
         """Initialise the path selector.
 
@@ -104,7 +104,7 @@ class SettingEntry(ttk.Frame):
         self,
         parent: tk.Widget,
         label_text: str,
-        tooltip_text: Optional[str] = None,
+        tooltip_text: str | None = None,
         entry_width: int = 30,
     ) -> None:
         """Initialise the setting entry.
@@ -156,8 +156,8 @@ class ModelSelector(ttk.Frame):
         self,
         parent: tk.Widget,
         model_display_names: list[str],
-        on_select: Optional[Callable[[str], None]] = None,
-        tooltip_text: Optional[str] = None,
+        on_select: Callable[[str], None] | None = None,
+        tooltip_text: str | None = None,
     ) -> None:
         """Initialise the model selector.
 

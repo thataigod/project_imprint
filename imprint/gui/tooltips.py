@@ -14,7 +14,6 @@ Usage::
 from __future__ import annotations
 
 import tkinter as tk
-from typing import Optional
 
 
 class ToolTip:
@@ -62,8 +61,8 @@ class ToolTip:
         self.text = text
         self._delay_ms = delay_ms
         self._wrap_length = wrap_length
-        self._tooltip_window: Optional[tk.Toplevel] = None
-        self._after_id: Optional[str] = None
+        self._tooltip_window: tk.Toplevel | None = None
+        self._after_id: str | None = None
 
         self.widget.bind("<Enter>", self._on_enter)
         self.widget.bind("<Leave>", self._on_leave)

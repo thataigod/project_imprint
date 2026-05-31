@@ -16,7 +16,6 @@ import queue
 import threading
 import tkinter as tk
 from tkinter import messagebox, scrolledtext, ttk
-from typing import Optional
 
 from imprint import __version__
 from imprint.config import (
@@ -35,7 +34,7 @@ from imprint.constants import (
 from imprint.engine import SorterEngine
 from imprint.events import EngineEvent, EventType, MessageLevel
 from imprint.gui.widgets import ModelSelector, PathSelector, SettingEntry
-from imprint.logging_setup import QueueHandler, configure_logging
+from imprint.logging_setup import configure_logging
 
 logger = logging.getLogger(__name__)
 
