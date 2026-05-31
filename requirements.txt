@@ -9,3 +9,9 @@ onnxruntime-gpu>=1.15.1,<2.0.0
 numpy>=1.24.0,<2.0.0
 opencv-python>=4.8.0,<5.0.0
 
+# Security overrides for transient dependencies
+pillow>=12.2.0
+requests>=2.33.0
+protobuf>=5.29.6
+
+
