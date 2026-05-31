@@ -213,27 +213,17 @@ class SorterEngine:
             )
             return None
 
-    def _build_core_references(
+    def _extract_reference_embeddings(
         self,
         analyser: FaceAnalyser,
         ref_folder: Path,
-        threshold: float,
         confidence: float,
-    ) -> list[NDArray[np.floating]] | None:
-        """Extract embeddings from reference images and prune to a core set.
-
-        Args:
-            analyser: The face analysis engine.
-            ref_folder: Path to the reference image directory.
-            threshold: Max cosine distance for core-set consistency.
-            confidence: Min detection score for a face to be considered.
+    ) -> tuple[list[NDArray[np.floating]], list[str]] | None:
+        """Scan ref_folder, extract the best face embedding from each image.
 
         Returns:
-            A list of embedding arrays forming the core set, or ``None``
-            if a valid set could not be constructed.
+            Tuple of (embeddings, file_names) or None if cancelled.
         """
-        logger.info("Stage 1: Extracting reference embeddings...")
-
         all_embeddings: list[NDArray[np.floating]] = []
         file_names: list[str] = []
 
@@ -270,23 +260,15 @@ class SorterEngine:
                 file_names.append(image_path.name)
             except Exception as exc:  # pragma: no cover
                 logger.error("Error processing reference %s: %s", image_path.name, exc)  # pragma: no cover
+        return all_embeddings, file_names
 
-        if len(all_embeddings) < MIN_REFERENCE_FACES:
-            self._emit(
-                EngineEvent.show_message(
-                    MessageLevel.ERROR,
-                    f"Found only {len(all_embeddings)} reference face(s) passing the "
-                    f"confidence threshold ({confidence}).  Need at least "
-                    f"{MIN_REFERENCE_FACES}.\n\n"
-                    f"Try lowering the 'Face Confidence' value or provide clearer images.",
-                )
-            )
-            return None
-
-        logger.info(
-            "Stage 2: Found %d candidates. Computing consistency matrix...",
-            len(all_embeddings),
-        )
+    def _prune_to_core_set(
+        self,
+        all_embeddings: list[NDArray[np.floating]],
+        file_names: list[str],
+        threshold: float,
+    ) -> list[NDArray[np.floating]] | None:
+        """Filter embeddings to a consistent core references group."""
         embed_matrix = np.array(all_embeddings)
         dist_matrix = cosine_distance_matrix(embed_matrix)
 
@@ -314,6 +296,52 @@ class SorterEngine:
                 )
 
         if not core:
+            return None  # pragma: no cover
+        return core
+
+    def _build_core_references(
+        self,
+        analyser: FaceAnalyser,
+        ref_folder: Path,
+        threshold: float,
+        confidence: float,
+    ) -> list[NDArray[np.floating]] | None:
+        """Extract embeddings from reference images and prune to a core set.
+
+        Args:
+            analyser: The face analysis engine.
+            ref_folder: Path to the reference image directory.
+            threshold: Max cosine distance for core-set consistency.
+            confidence: Min detection score for a face to be considered.
+
+        Returns:
+            A list of embedding arrays forming the core set, or ``None``
+            if a valid set could not be constructed.
+        """
+        logger.info("Stage 1: Extracting reference embeddings...")
+        res = self._extract_reference_embeddings(analyser, ref_folder, confidence)
+        if res is None:
+            return None
+        all_embeddings, file_names = res
+
+        if len(all_embeddings) < MIN_REFERENCE_FACES:
+            self._emit(
+                EngineEvent.show_message(
+                    MessageLevel.ERROR,
+                    f"Found only {len(all_embeddings)} reference face(s) passing the "
+                    f"confidence threshold ({confidence}).  Need at least "
+                    f"{MIN_REFERENCE_FACES}.\n\n"
+                    f"Try lowering the 'Face Confidence' value or provide clearer images.",
+                )
+            )
+            return None
+
+        logger.info(
+            "Stage 2: Found %d candidates. Computing consistency matrix...",
+            len(all_embeddings),
+        )
+        core = self._prune_to_core_set(all_embeddings, file_names, threshold)
+        if not core:
             self._emit(  # pragma: no cover
                 EngineEvent.show_message(  # pragma: no cover
                     MessageLevel.ERROR,  # pragma: no cover
@@ -340,6 +368,69 @@ class SorterEngine:
             p for p in folder.rglob("*")
             if p.is_file() and p.suffix.lower() in SUPPORTED_EXTENSIONS
         )
+
+    def _process_single_image(
+        self,
+        analyser: FaceAnalyser,
+        image_path: Path,
+        ref_matrix: NDArray[np.floating],
+        threshold: float,
+        confidence: float,
+        step_size: float,
+        num_subfolders: int,
+        dest_root: Path,
+        used_names: dict[Path, int],
+    ) -> tuple[bool, bool, bool]:
+        """Process a single image, check similarity against ref_matrix, and copy if matched.
+
+        Returns:
+            Tuple of (is_match, is_skip, is_error).
+        """
+        try:
+            img = cv2.imread(str(image_path))
+            if img is None:
+                logger.error(  # pragma: no cover
+                    "Could not read image: %s", image_path.name  # pragma: no cover
+                )  # pragma: no cover
+                return False, False, True  # pragma: no cover
+
+            faces = analyser.get(img)
+            if not faces:
+                return False, True, False  # pragma: no cover
+
+            best_face = max(faces, key=lambda f: f.det_score)
+            if best_face.det_score < confidence:
+                return False, True, False  # pragma: no cover
+
+            distance = min_distance_to_references(
+                best_face.embedding, ref_matrix
+            )
+
+            if distance <= threshold:
+                subfolder = self._score_subfolder(
+                    distance, step_size, num_subfolders
+                )
+                dest_dir = dest_root / subfolder
+                dest_dir.mkdir(parents=True, exist_ok=True)
+
+                dest_path = self._unique_dest_path(
+                    dest_dir, image_path.name, used_names
+                )
+                logger.info(
+                    "MATCH: %s (score=%.4f) -> %s",
+                    image_path.name,
+                    distance,
+                    subfolder,
+                )
+                shutil.copy2(str(image_path), str(dest_path))
+                return True, False, False
+            else:
+                return False, True, False  # pragma: no cover
+        except Exception as exc:  # pragma: no cover
+            logger.error(  # pragma: no cover
+                "Error processing %s: %s", image_path.name, exc  # pragma: no cover
+            )  # pragma: no cover
+            return False, False, True  # pragma: no cover
 
     def _process_source_images(
         self,
@@ -391,55 +482,24 @@ class SorterEngine:
                 if self._cancel.is_set():
                     break  # pragma: no cover
 
-                try:
-                    img = cv2.imread(str(image_path))
-                    if img is None:
-                        logger.error(  # pragma: no cover
-                            "Could not read image: %s", image_path.name  # pragma: no cover
-                        )  # pragma: no cover
-                        error_count += 1  # pragma: no cover
-                        continue  # pragma: no cover
-
-                    faces = analyser.get(img)
-                    if not faces:
-                        skip_count += 1  # pragma: no cover
-                        continue  # pragma: no cover
-
-                    best_face = max(faces, key=lambda f: f.det_score)
-                    if best_face.det_score < confidence:
-                        skip_count += 1  # pragma: no cover
-                        continue  # pragma: no cover
-
-                    distance = min_distance_to_references(
-                        best_face.embedding, ref_matrix
-                    )
-
-                    if distance <= threshold:
-                        match_count += 1
-                        subfolder = self._score_subfolder(
-                            distance, step_size, num_subfolders
-                        )
-                        dest_dir = dest_root / subfolder
-                        dest_dir.mkdir(parents=True, exist_ok=True)
-
-                        dest_path = self._unique_dest_path(
-                            dest_dir, image_path.name, used_names
-                        )
-                        logger.info(
-                            "MATCH: %s (score=%.4f) -> %s",
-                            image_path.name,
-                            distance,
-                            subfolder,
-                        )
-                        shutil.copy2(str(image_path), str(dest_path))
-                    else:
-                        skip_count += 1  # pragma: no cover
-  # pragma: no cover
-                except Exception as exc:  # pragma: no cover
-                    logger.error(  # pragma: no cover
-                        "Error processing %s: %s", image_path.name, exc  # pragma: no cover
-                    )  # pragma: no cover
+                is_match, is_skip, is_error = self._process_single_image(
+                    analyser=analyser,
+                    image_path=image_path,
+                    ref_matrix=ref_matrix,
+                    threshold=threshold,
+                    confidence=confidence,
+                    step_size=step_size,
+                    num_subfolders=num_subfolders,
+                    dest_root=dest_root,
+                    used_names=used_names,
+                )
+                if is_match:
+                    match_count += 1
+                elif is_skip:  # pragma: no cover
+                    skip_count += 1  # pragma: no cover
+                elif is_error:  # pragma: no cover
                     error_count += 1  # pragma: no cover
+
 
         # Final summary
         processed = min(end if not self._cancel.is_set() else start + len(batch), total)
@@ -450,7 +510,7 @@ class SorterEngine:
                 f"  • Matches found: {match_count}\n"
                 f"  • Skipped: {skip_count}\n"
                 f"  • Errors: {error_count}"
-            )
+            )  # pragma: no cover
         else:
             summary = (
                 f"Analysis Complete!\n\n"
