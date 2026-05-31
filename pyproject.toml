@@ -6,7 +6,7 @@ build-backend = "setuptools.backends._legacy:_Backend"
 name = "imprint-face-sorter"
 version = "5.0.0"
 description = "GPU-accelerated desktop application for sorting images based on facial similarity."
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.14"
 license = {text = "MIT"}
 authors = [{name = "Imprint Team"}]
 readme = "README.md"
