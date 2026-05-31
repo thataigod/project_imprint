@@ -19,7 +19,7 @@ import math
 import shutil
 import threading
 from pathlib import Path
-from typing import Callable, Protocol, runtime_checkable
+from typing import Any, Callable, Protocol, runtime_checkable
 
 import cv2
 import numpy as np
@@ -52,10 +52,12 @@ class FaceResult(Protocol):
     """Minimal interface for a single detected face."""
 
     @property
-    def det_score(self) -> float: ...  # noqa: E704
+    def det_score(self) -> float:
+        ...  # noqa: E704
 
     @property
-    def embedding(self) -> NDArray[np.floating]: ...  # noqa: E704
+    def embedding(self) -> NDArray[np.floating]:
+        ...  # noqa: E704
 
 
 @runtime_checkable
@@ -66,9 +68,11 @@ class FaceAnalyser(Protocol):
     lightweight mock during unit tests — no GPU or model download needed.
     """
 
-    def prepare(self, ctx_id: int, det_size: tuple[int, int]) -> None: ...  # noqa: E704
+    def prepare(self, ctx_id: int, det_size: tuple[int, int]) -> None:
+        ...  # noqa: E704
 
-    def get(self, img: NDArray[np.uint8]) -> list[FaceResult]: ...  # noqa: E704
+    def get(self, img: NDArray[Any]) -> list[FaceResult]:
+        ...  # noqa: E704
 
 
 # Type alias for the event callback
@@ -123,7 +127,9 @@ class SorterEngine:
         try:
             self._run_pipeline()
         except Exception as exc:  # pragma: no cover
-            logger.critical("Unhandled error in engine: %s", exc, exc_info=True)  # pragma: no cover
+            logger.critical(
+                "Unhandled error in engine: %s", exc, exc_info=True
+            )  # pragma: no cover
             self._emit(  # pragma: no cover
                 EngineEvent.show_message(
                     MessageLevel.ERROR,
@@ -161,7 +167,8 @@ class SorterEngine:
         if not source_images:
             self._emit(  # pragma: no cover
                 EngineEvent.show_message(  # pragma: no cover
-                    MessageLevel.INFO, "No supported images found in the source folder."  # pragma: no cover
+                    MessageLevel.INFO,
+                    "No supported images found in the source folder.",  # pragma: no cover
                 )  # pragma: no cover
             )  # pragma: no cover
             return  # pragma: no cover
@@ -169,7 +176,11 @@ class SorterEngine:
         # Stage 3: Process and sort
         ref_matrix = np.array(core_embeddings)
         self._process_source_images(
-            analyser, source_images, ref_matrix, threshold, confidence,
+            analyser,
+            source_images,
+            ref_matrix,
+            threshold,
+            confidence,
         )
 
     def _ensure_analyser(self) -> FaceAnalyser | None:
@@ -185,6 +196,7 @@ class SorterEngine:
 
             model_profile = None
             from imprint.constants import MODEL_REGISTRY
+
             model_profile = MODEL_REGISTRY.get(model_name)
 
             if model_profile and model_profile.use_rec_name:
@@ -202,7 +214,7 @@ class SorterEngine:
             app.prepare(ctx_id=0, det_size=DEFAULT_DETECTION_SIZE)
             logger.info("Model '%s' loaded successfully.", model_name)
             self._analyser = app
-            return app
+            return app  # type: ignore[no-any-return]
         except Exception as exc:
             logger.error("Failed to load model '%s': %s", model_name, exc)
             self._emit(
@@ -228,7 +240,8 @@ class SorterEngine:
         file_names: list[str] = []
 
         ref_images = sorted(
-            p for p in ref_folder.iterdir()
+            p
+            for p in ref_folder.iterdir()
             if p.is_file() and p.suffix.lower() in SUPPORTED_EXTENSIONS
         )
 
@@ -238,7 +251,9 @@ class SorterEngine:
             try:
                 img = cv2.imread(str(image_path))
                 if img is None:
-                    logger.warning("Could not read reference image: %s", image_path.name)  # pragma: no cover
+                    logger.warning(
+                        "Could not read reference image: %s", image_path.name
+                    )  # pragma: no cover
                     continue  # pragma: no cover
 
                 faces = analyser.get(img)
@@ -259,7 +274,9 @@ class SorterEngine:
                 all_embeddings.append(best_face.embedding)
                 file_names.append(image_path.name)
             except Exception as exc:  # pragma: no cover
-                logger.error("Error processing reference %s: %s", image_path.name, exc)  # pragma: no cover
+                logger.error(
+                    "Error processing reference %s: %s", image_path.name, exc
+                )  # pragma: no cover
         return all_embeddings, file_names
 
     def _prune_to_core_set(
@@ -278,9 +295,7 @@ class SorterEngine:
 
         # Build core set: medoid + embeddings within threshold
         core: list[NDArray[np.floating]] = [medoid_embedding]
-        logger.info(
-            "Stage 3: Building core set (consistency < %.4f)...", threshold
-        )
+        logger.info("Stage 3: Building core set (consistency < %.4f)...", threshold)
         logger.info("  Keeping: %s (medoid)", file_names[medoid_idx])
 
         for i, emb in enumerate(all_embeddings):
@@ -345,14 +360,12 @@ class SorterEngine:
             self._emit(  # pragma: no cover
                 EngineEvent.show_message(  # pragma: no cover
                     MessageLevel.ERROR,  # pragma: no cover
-                    "Could not form a consistent core reference group."  # pragma: no cover
+                    "Could not form a consistent core reference group.",  # pragma: no cover
                 )  # pragma: no cover
             )  # pragma: no cover
             return None  # pragma: no cover
 
-        logger.info(
-            "Core reference set built with %d embedding(s).", len(core)
-        )
+        logger.info("Core reference set built with %d embedding(s).", len(core))
         return core
 
     def _discover_images(self, folder: Path) -> list[Path]:
@@ -365,7 +378,8 @@ class SorterEngine:
             Sorted list of image paths.
         """
         return sorted(
-            p for p in folder.rglob("*")
+            p
+            for p in folder.rglob("*")
             if p.is_file() and p.suffix.lower() in SUPPORTED_EXTENSIONS
         )
 
@@ -390,7 +404,8 @@ class SorterEngine:
             img = cv2.imread(str(image_path))
             if img is None:
                 logger.error(  # pragma: no cover
-                    "Could not read image: %s", image_path.name  # pragma: no cover
+                    "Could not read image: %s",
+                    image_path.name,  # pragma: no cover
                 )  # pragma: no cover
                 return False, False, True  # pragma: no cover
 
@@ -402,20 +417,14 @@ class SorterEngine:
             if best_face.det_score < confidence:
                 return False, True, False  # pragma: no cover
 
-            distance = min_distance_to_references(
-                best_face.embedding, ref_matrix
-            )
+            distance = min_distance_to_references(best_face.embedding, ref_matrix)
 
             if distance <= threshold:
-                subfolder = self._score_subfolder(
-                    distance, step_size, num_subfolders
-                )
+                subfolder = self._score_subfolder(distance, step_size, num_subfolders)
                 dest_dir = dest_root / subfolder
                 dest_dir.mkdir(parents=True, exist_ok=True)
 
-                dest_path = self._unique_dest_path(
-                    dest_dir, image_path.name, used_names
-                )
+                dest_path = self._unique_dest_path(dest_dir, image_path.name, used_names)
                 logger.info(
                     "MATCH: %s (score=%.4f) -> %s",
                     image_path.name,
@@ -428,7 +437,9 @@ class SorterEngine:
                 return False, True, False  # pragma: no cover
         except Exception as exc:  # pragma: no cover
             logger.error(  # pragma: no cover
-                "Error processing %s: %s", image_path.name, exc  # pragma: no cover
+                "Error processing %s: %s",
+                image_path.name,
+                exc,  # pragma: no cover
             )  # pragma: no cover
             return False, False, True  # pragma: no cover
 
@@ -500,7 +511,6 @@ class SorterEngine:
                 elif is_error:  # pragma: no cover
                     error_count += 1  # pragma: no cover
 
-
         # Final summary
         processed = min(end if not self._cancel.is_set() else start + len(batch), total)
         if self._cancel.is_set():
@@ -528,9 +538,7 @@ class SorterEngine:
     # -- Helpers -----------------------------------------------------------
 
     @staticmethod
-    def _score_subfolder(
-        distance: float, step_size: float, num_subfolders: int
-    ) -> str:
+    def _score_subfolder(distance: float, step_size: float, num_subfolders: int) -> str:
         """Compute the subfolder name for a given distance score.
 
         Args:

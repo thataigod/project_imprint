@@ -98,9 +98,7 @@ class EngineEvent:
         return cls(event_type=EventType.STATUS, message=message)
 
     @classmethod
-    def show_message(
-        cls, level: MessageLevel, message: str
-    ) -> EngineEvent:
+    def show_message(cls, level: MessageLevel, message: str) -> EngineEvent:
         """Create a MESSAGE event requesting a modal dialog.
 
         Args:

@@ -53,8 +53,7 @@ _TIPS = {
         "Subfolders are scanned recursively."
     ),
     "destination": (
-        "Folder where matched images will be copied, organised into "
-        "score-based subdirectories."
+        "Folder where matched images will be copied, organised into " "score-based subdirectories."
     ),
     "model": (
         "Antelope v2 = best accuracy (slowest). "
@@ -249,16 +248,12 @@ class Application(tk.Tk):
 
         # Progress bar
         self._progress_var = tk.DoubleVar()
-        self._progress_bar = ttk.Progressbar(
-            frame, variable=self._progress_var, maximum=100
-        )
+        self._progress_bar = ttk.Progressbar(frame, variable=self._progress_var, maximum=100)
         self._progress_bar.pack(fill="x", pady=(0, 4))
 
         # Status label
         self._status_var = tk.StringVar(value="Ready.")
-        self._status_label = ttk.Label(
-            frame, textvariable=self._status_var, wraplength=680
-        )
+        self._status_label = ttk.Label(frame, textvariable=self._status_var, wraplength=680)
         self._status_label.pack(fill="x")
 
     def _build_log_section(self, parent: ttk.Frame) -> None:
@@ -392,12 +387,12 @@ class Application(tk.Tk):
 
         # Save config
         self._config_manager.save(settings)  # pragma: no cover
-  # pragma: no cover
+        # pragma: no cover
         # Prepare UI  # pragma: no cover
         self._set_ui_running(True)  # pragma: no cover
         self._clear_log()  # pragma: no cover
         self._cancel_event.clear()  # pragma: no cover
-  # pragma: no cover
+        # pragma: no cover
         # Launch engine  # pragma: no cover
         engine = SorterEngine(  # pragma: no cover
             paths=settings.paths,  # pragma: no cover
@@ -422,10 +417,12 @@ class Application(tk.Tk):
         """
         state = "disabled" if running else "normal"
         for widget in self._input_widgets:
-            widget.config(state=state)
+            widget.config(state=state)  # type: ignore[attr-defined]
 
         if running:
-            self._run_button.config(state="disabled", text="Analysis in Progress...")  # pragma: no cover
+            self._run_button.config(
+                state="disabled", text="Analysis in Progress..."
+            )  # pragma: no cover
             self._cancel_button.config(state="normal")  # pragma: no cover
         else:
             self._run_button.config(state="normal", text="Save Config & Run Analysis")
@@ -516,7 +513,9 @@ class Application(tk.Tk):
             event: The right-click event.
         """
         has_selection = bool(self._log_text.tag_ranges("sel"))  # pragma: no cover
-        self._log_menu.entryconfig("Copy", state="normal" if has_selection else "disabled")  # pragma: no cover
+        self._log_menu.entryconfig(
+            "Copy", state="normal" if has_selection else "disabled"
+        )  # pragma: no cover
         self._log_menu.tk_popup(event.x_root, event.y_root)  # pragma: no cover
 
     def _copy_log(self) -> None:

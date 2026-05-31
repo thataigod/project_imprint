@@ -161,9 +161,7 @@ class TestEngineEventEmission:
         )
         engine.run()
 
-        message_events = [
-            e for e in events if e.event_type == EventType.MESSAGE
-        ]
+        message_events = [e for e in events if e.event_type == EventType.MESSAGE]
         assert len(message_events) >= 1
         assert any(e.level == MessageLevel.ERROR for e in message_events)
 

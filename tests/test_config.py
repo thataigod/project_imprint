@@ -90,9 +90,7 @@ class TestConfigManager:
     def test_missing_sections_use_defaults(self, tmp_path: Path) -> None:
         """A config file with missing sections should fill in defaults."""
         config_path = tmp_path / "config.ini"
-        config_path.write_text(
-            "[Paths]\nreference_folder = /ref\n", encoding="utf-8"
-        )
+        config_path.write_text("[Paths]\nreference_folder = /ref\n", encoding="utf-8")
         manager = ConfigManager(filepath=config_path)
         settings = manager.load()
 
@@ -190,25 +188,19 @@ class TestValidatePathSettings:
 
     def test_empty_reference_folder(self) -> None:
         """An empty reference folder should produce an error."""
-        settings = PathSettings(
-            source_folder="/src", destination_folder="/dst"
-        )
+        settings = PathSettings(source_folder="/src", destination_folder="/dst")
         errors = validate_path_settings(settings)
         assert any("reference" in e.lower() for e in errors)
 
     def test_empty_source_folder(self) -> None:
         """An empty source folder should produce an error."""
-        settings = PathSettings(
-            reference_folder="/ref", destination_folder="/dst"
-        )
+        settings = PathSettings(reference_folder="/ref", destination_folder="/dst")
         errors = validate_path_settings(settings)
         assert any("source" in e.lower() for e in errors)
 
     def test_empty_destination_folder(self) -> None:
         """An empty destination folder should produce an error."""
-        settings = PathSettings(
-            reference_folder="/ref", source_folder="/src"
-        )
+        settings = PathSettings(reference_folder="/ref", source_folder="/src")
         errors = validate_path_settings(settings)
         assert any("destination" in e.lower() for e in errors)
 

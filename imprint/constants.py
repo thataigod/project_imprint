@@ -13,9 +13,14 @@ from dataclasses import dataclass
 # File types
 # ---------------------------------------------------------------------------
 
-SUPPORTED_EXTENSIONS: frozenset[str] = frozenset({
-    ".jpg", ".jpeg", ".png", ".webp",
-})
+SUPPORTED_EXTENSIONS: frozenset[str] = frozenset(
+    {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+    }
+)
 """Image file extensions (lowercase, including dot) that the engine will process."""
 
 # ---------------------------------------------------------------------------
@@ -50,6 +55,7 @@ ONNX_PROVIDERS: tuple[str, ...] = (
 # ---------------------------------------------------------------------------
 # Model registry
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True)
 class ModelProfile:

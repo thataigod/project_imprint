@@ -21,10 +21,7 @@ def tk_root():
 def test_path_selector_init(tk_root: tk.Tk) -> None:
     """Verify PathSelector initializes correctly."""
     selector = PathSelector(
-        tk_root,
-        label_text="Test Label",
-        dialog_title="Test Dialog",
-        tooltip_text="Test Tooltip"
+        tk_root, label_text="Test Label", dialog_title="Test Dialog", tooltip_text="Test Tooltip"
     )
     selector.pack()
 
@@ -59,7 +56,7 @@ def test_model_selector_init(tk_root: tk.Tk) -> None:
         tk_root,
         model_display_names=["Model A", "Model B"],
         on_select=mock_on_select,
-        tooltip_text="Tooltip"
+        tooltip_text="Tooltip",
     )
     selector.pack()
 
@@ -74,11 +71,7 @@ def test_model_selector_init(tk_root: tk.Tk) -> None:
 
 def test_setting_entry_init(tk_root: tk.Tk) -> None:
     """Verify SettingEntry initializes correctly."""
-    entry = SettingEntry(
-        tk_root,
-        label_text="Test Setting:",
-        tooltip_text="Test Tooltip"
-    )
+    entry = SettingEntry(tk_root, label_text="Test Setting:", tooltip_text="Test Tooltip")
     entry.pack()
 
     assert entry.value_var.get() == ""
