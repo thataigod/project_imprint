@@ -10,10 +10,8 @@ from __future__ import annotations
 import configparser
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Optional
 
 from imprint.constants import CONFIG_FILENAME, DEFAULT_MODEL, MODEL_REGISTRY
-
 
 # ---------------------------------------------------------------------------
 # Typed settings containers

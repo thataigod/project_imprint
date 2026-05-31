@@ -8,14 +8,12 @@ and imported throughout the codebase.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, FrozenSet, Tuple
-
 
 # ---------------------------------------------------------------------------
 # File types
 # ---------------------------------------------------------------------------
 
-SUPPORTED_EXTENSIONS: FrozenSet[str] = frozenset({
+SUPPORTED_EXTENSIONS: frozenset[str] = frozenset({
     ".jpg", ".jpeg", ".png", ".webp",
 })
 """Image file extensions (lowercase, including dot) that the engine will process."""
@@ -27,7 +25,7 @@ SUPPORTED_EXTENSIONS: FrozenSet[str] = frozenset({
 CONFIG_FILENAME: str = "config.ini"
 """Name of the persistent configuration file."""
 
-DEFAULT_DETECTION_SIZE: Tuple[int, int] = (640, 640)
+DEFAULT_DETECTION_SIZE: tuple[int, int] = (640, 640)
 """Pixel dimensions passed to the face-detection model."""
 
 COSINE_EPSILON: float = 1e-6
@@ -43,7 +41,7 @@ MIN_REFERENCE_FACES: int = 2
 # Execution providers
 # ---------------------------------------------------------------------------
 
-ONNX_PROVIDERS: Tuple[str, ...] = (
+ONNX_PROVIDERS: tuple[str, ...] = (
     "CUDAExecutionProvider",
     "CPUExecutionProvider",
 )
@@ -73,7 +71,7 @@ class ModelProfile:
     use_rec_name: bool = False
 
 
-MODEL_REGISTRY: Dict[str, ModelProfile] = {
+MODEL_REGISTRY: dict[str, ModelProfile] = {
     "antelopev2": ModelProfile(
         code_name="antelopev2",
         display_name="Antelope v2 (SOTA Accuracy)",

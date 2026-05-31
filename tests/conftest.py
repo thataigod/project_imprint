@@ -7,16 +7,14 @@ mock face analysers, and settings objects.
 from __future__ import annotations
 
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List
-from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from imprint.config import AnalysisSettings, AppSettings, PathSettings
+from imprint.config import AnalysisSettings, PathSettings
 
 
 @dataclass
