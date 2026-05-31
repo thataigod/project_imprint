@@ -6,6 +6,8 @@ and vectorized minimum distance computation.
 
 from __future__ import annotations
 
+import unittest.mock
+
 import numpy as np
 import pytest
 from numpy.typing import NDArray
@@ -118,6 +120,27 @@ class TestCosineDistanceMatrix:
         matrix = cosine_distance_matrix(embeddings)
         assert matrix.shape == (1, 1)
         assert matrix[0, 0] == pytest.approx(0.0, abs=1e-6)
+
+    def test_fallback_without_scipy(self) -> None:
+        """Verify the pure-NumPy fallback works when scipy is unavailable."""
+        a = np.array([[1, 0], [0, 1]])
+
+        # We mock __import__ to raise ImportError specifically for scipy
+        original_import = __import__
+
+        def mock_import(name, *args, **kwargs):
+            if "scipy" in name:
+                raise ImportError("Mocked missing scipy")
+            return original_import(name, *args, **kwargs)
+
+        with unittest.mock.patch("builtins.__import__", side_effect=mock_import):
+            matrix = cosine_distance_matrix(a)
+
+        assert matrix.shape == (2, 2)
+        assert matrix[0, 0] == pytest.approx(0.0, abs=1e-5)
+        assert matrix[1, 1] == pytest.approx(0.0, abs=1e-5)
+        assert matrix[0, 1] > 0.5
+        assert matrix[1, 0] > 0.5
 
 
 class TestFindMedoidIndex:
