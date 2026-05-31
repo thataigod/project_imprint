@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "imprint-face-sorter"
+version = "5.0.0"
+description = "GPU-accelerated desktop application for sorting images based on facial similarity."
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Imprint Team"}]
+readme = "README.md"
+
+dependencies = [
+    "insightface>=0.7.3",
+    "onnxruntime-gpu==1.15.1",
+    "numpy>=1.24.0,<2.0.0",
+    "opencv-python>=4.8.0",
+    "scipy>=1.10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+imprint = "imprint.__main__:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 99
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+
+[tool.setuptools.packages.find]
+where = ["."]
