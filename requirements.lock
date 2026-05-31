@@ -86,16 +86,18 @@ packaging==24.2
     #   matplotlib
     #   onnxruntime-gpu
     #   scikit-image
-pillow==11.0.0
+pillow==12.2.0
     # via
+    #   -r requirements.txt
     #   imageio
     #   insightface
     #   matplotlib
     #   scikit-image
 prettytable==3.17.0
     # via insightface
-protobuf==5.28.3
+protobuf==7.35.0
     # via
+    #   -r requirements.txt
     #   onnx
     #   onnxruntime-gpu
 pydantic==2.13.4
@@ -110,8 +112,10 @@ python-dateutil==2.9.0.post0
     # via matplotlib
 pyyaml==6.0.3
     # via albumentations
-requests==2.32.3
-    # via insightface
+requests==2.34.2
+    # via
+    #   -r requirements.txt
+    #   insightface
 scikit-image==0.25.2
     # via insightface
 scikit-learn==1.7.2
