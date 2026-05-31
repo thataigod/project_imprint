@@ -45,6 +45,7 @@ def dummy_config(tmp_path: Path) -> AppSettings:
 
 class DummyFace:
     """Mock insightface result object."""
+
     def __init__(self, normed_embedding: NDArray[Any], det_score: float = 0.9):
         self.embedding = normed_embedding
         self.det_score = det_score
@@ -58,7 +59,7 @@ def test_engine_successful_pipeline(dummy_config: AppSettings) -> None:
         paths=dummy_config.paths,
         analysis=dummy_config.analysis,
         emit=events.append,
-        cancel_event=cancel
+        cancel_event=cancel,
     )
 
     # Mock InsightFace FaceAnalysis
@@ -70,9 +71,9 @@ def test_engine_successful_pipeline(dummy_config: AppSettings) -> None:
         mock_profile = MagicMock()
         mock_profile.use_rec_name = False
         with patch.dict("imprint.constants.MODEL_REGISTRY", {"buffalo_s": mock_profile}):
-
             # Mock cv2.imread and insightface inference
             import numpy as np
+
             with patch("cv2.imread", return_value=np.zeros((100, 100, 3), dtype=np.uint8)):
                 # Mock face detection to return 1 face per image
                 mock_app.get.return_value = [DummyFace(np.array([1.0, 0.0]))]
@@ -83,7 +84,6 @@ def test_engine_successful_pipeline(dummy_config: AppSettings) -> None:
 
                     # Verify successful execution
                     assert mock_copy.call_count == 2  # 2 source images
-
 
                     event_types = [e.event_type for e in events]
 
@@ -100,7 +100,7 @@ def test_engine_insufficient_references(dummy_config: AppSettings) -> None:
         paths=dummy_config.paths,
         analysis=dummy_config.analysis,
         emit=events.append,
-        cancel_event=cancel
+        cancel_event=cancel,
     )
 
     with patch("insightface.app.FaceAnalysis") as mock_face_analysis:
@@ -110,16 +110,19 @@ def test_engine_insufficient_references(dummy_config: AppSettings) -> None:
         mock_profile = MagicMock()
         mock_profile.use_rec_name = False
         with patch.dict("imprint.constants.MODEL_REGISTRY", {"buffalo_s": mock_profile}):
-
             import numpy as np
+
             with patch("cv2.imread", return_value=np.zeros((10, 10, 3), dtype=np.uint8)):
                 # Mock get to return NO faces
                 mock_app.get.return_value = []
 
                 engine.run()
 
-
-                error_events = [e for e in events if e.event_type == EventType.MESSAGE and e.level.value == "error"]
+                error_events = [
+                    e
+                    for e in events
+                    if e.event_type == EventType.MESSAGE and e.level.value == "error"
+                ]
                 assert len(error_events) > 0
                 assert "Found only 0 reference face(s)" in error_events[0].message
 
@@ -132,7 +135,7 @@ def test_engine_load_model_exception(dummy_config: AppSettings) -> None:
         paths=dummy_config.paths,
         analysis=dummy_config.analysis,
         emit=events.append,
-        cancel_event=cancel
+        cancel_event=cancel,
     )
 
     # Patch FaceAnalysis to raise an unexpected error
@@ -140,11 +143,11 @@ def test_engine_load_model_exception(dummy_config: AppSettings) -> None:
         mock_profile = MagicMock()
         mock_profile.use_rec_name = True
         with patch.dict("imprint.constants.MODEL_REGISTRY", {"buffalo_s": mock_profile}):
-
             engine.run()
 
-
-            error_events = [e for e in events if e.event_type == EventType.MESSAGE and e.level.value == "error"]
+            error_events = [
+                e for e in events if e.event_type == EventType.MESSAGE and e.level.value == "error"
+            ]
             assert len(error_events) > 0
             assert "CUDA out of memory" in error_events[0].message
 
@@ -157,7 +160,7 @@ def test_engine_cancellation_during_run(dummy_config: AppSettings) -> None:
         paths=dummy_config.paths,
         analysis=dummy_config.analysis,
         emit=events.append,
-        cancel_event=cancel
+        cancel_event=cancel,
     )
 
     # Pre-set the cancel event so it exits immediately after load
@@ -169,7 +172,6 @@ def test_engine_cancellation_during_run(dummy_config: AppSettings) -> None:
 
         mock_profile = MagicMock()
         with patch.dict("imprint.constants.MODEL_REGISTRY", {"buffalo_s": mock_profile}):
-
             engine.run()
 
             # The engine should exit after checking the cancel flag early on

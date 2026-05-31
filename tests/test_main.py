@@ -48,7 +48,9 @@ def test_main_tcl_error() -> None:
 
 def test_main_import_error() -> None:
     """The main function should exit gracefully with code 1 if an ImportError is raised."""
-    with patch("imprint.gui.app.Application", side_effect=ImportError("No module named '_tkinter'")):
+    with patch(
+        "imprint.gui.app.Application", side_effect=ImportError("No module named '_tkinter'")
+    ):
         with patch.object(sys, "exit") as mock_exit:
             main()
             mock_exit.assert_called_once_with(1)
@@ -61,4 +63,3 @@ def test_main_other_exception_propagates() -> None:
     with patch("imprint.gui.app.Application", side_effect=ValueError("Unexpected error")):
         with pytest.raises(ValueError, match="Unexpected error"):
             main()
-

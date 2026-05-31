@@ -186,6 +186,3 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
         pytest.skip(
             f"Skipping GUI test '{item.name}': No display environment or Tcl/Tk is not available."
         )
-
-
-

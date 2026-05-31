@@ -49,3 +49,15 @@ This document outlines the key technical decisions taken during the rebuild and 
 ## 7. Pragma-Ignored Low-Level Exception Paths in Testing
 *   **Decision**: Maintain a strict 100% test coverage target in CI, but allow `# pragma: no cover` on low-level, system-dependent error-handling blocks.
 *   **Why**: Simulating low-level platform errors (such as C-level ONNX GPU failures, corrupted image file descriptors, or disk-write blocks) in Python unit tests requires complex mocking layers. The overhead of writing and maintaining these mocks is disproportionately high compared to the negligible safety they add.
+
+---
+
+## 8. Static Type-Checking with Mypy
+*   **Decision**: Integrate `mypy` with a strict configuration (`disallow_untyped_defs`, `disallow_incomplete_defs`, `warn_return_any`) into the development workflow and CI pipeline.
+*   **Why**: Since the codebase handles complex multi-threaded flow, dependency-injected interfaces (e.g. `FaceAnalyser`), and numpy arrays/matrices, type annotations are critical for preventing runtime type mismatches. Using `mypy` ensures these type annotations are verified automatically on every commit.
+
+---
+
+## 9. Windows pytest stdout redirection bug and the `-s` flag
+*   **Decision**: For local test runs on Windows, the `-s` flag (no stdout/stderr capture, e.g. `pytest tests/ --cov=imprint -s`) must be used.
+*   **Why**: Standard pytest runs capture standard streams, which can corrupt file descriptor references in Windows Tkinter/Tcl handles during repeated setup/teardowns, leading to initialization crashes. Running without capture (-s) resolves this platform-specific friction.

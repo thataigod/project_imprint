@@ -62,9 +62,7 @@ class PathSelector(ttk.Frame):
         self._input_widgets.append(self._entry)
 
         # Browse button
-        self._browse_btn = ttk.Button(
-            self, text="Browse...", command=self._browse, width=10
-        )
+        self._browse_btn = ttk.Button(self, text="Browse...", command=self._browse, width=10)
         self._browse_btn.pack(side="left")
         self._input_widgets.append(self._browse_btn)
 
@@ -122,9 +120,7 @@ class SettingEntry(ttk.Frame):
         label = ttk.Label(self, text=label_text, width=32, anchor="w")
         label.pack(side="left", padx=(0, 5))
 
-        self._entry = ttk.Entry(
-            self, textvariable=self.value_var, width=entry_width
-        )
+        self._entry = ttk.Entry(self, textvariable=self.value_var, width=entry_width)
         self._entry.pack(side="left")
 
         if tooltip_text:

@@ -16,8 +16,13 @@ def test_queue_handler_error_handling() -> None:
     handler = QueueHandler(log_queue)
 
     dummy_record = logging.LogRecord(
-        name="test", level=logging.INFO, pathname="test.py", lineno=1,
-        msg="Test message", args=(), exc_info=None
+        name="test",
+        level=logging.INFO,
+        pathname="test.py",
+        lineno=1,
+        msg="Test message",
+        args=(),
+        exc_info=None,
     )
 
     # We patch the queue.put to raise an exception, triggering the except block
@@ -40,7 +45,6 @@ def test_configure_logging(tmp_path: Path) -> None:
     assert logging.StreamHandler in handler_types
     assert QueueHandler in handler_types
     assert logging.handlers.RotatingFileHandler in handler_types
-
 
     # Re-configuring should clear existing handlers (still 3 total)
     logger = configure_logging(log_queue, log_dir=tmp_path)

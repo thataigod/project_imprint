@@ -83,7 +83,7 @@ class TestCosineDistance:
         a = np.array([1.0, 0.0])
         b = np.array([0.0, 1.0])
         result = cosine_distance(a, b)
-        assert type(result) is float
+        assert isinstance(result, float)
 
 
 class TestCosineDistanceMatrix:
@@ -149,11 +149,13 @@ class TestFindMedoidIndex:
     def test_known_medoid(self) -> None:
         """The medoid should be the point closest to all others."""
         # Create a cluster where index 1 is clearly central
-        dist_matrix = np.array([
-            [0.0, 0.1, 0.9],
-            [0.1, 0.0, 0.8],
-            [0.9, 0.8, 0.0],
-        ])
+        dist_matrix = np.array(
+            [
+                [0.0, 0.1, 0.9],
+                [0.1, 0.0, 0.8],
+                [0.9, 0.8, 0.0],
+            ]
+        )
         assert find_medoid_index(dist_matrix) == 1
 
     def test_single_point(self) -> None:
@@ -165,15 +167,13 @@ class TestFindMedoidIndex:
         """Return type should be a native Python int."""
         dist_matrix = np.array([[0.0, 0.5], [0.5, 0.0]])
         result = find_medoid_index(dist_matrix)
-        assert type(result) is int
+        assert isinstance(result, int)
 
 
 class TestMinDistanceToReferences:
     """Tests for min_distance_to_references()."""
 
-    def test_exact_match_returns_zero(
-        self, sample_embedding: NDArray[np.floating]
-    ) -> None:
+    def test_exact_match_returns_zero(self, sample_embedding: NDArray[np.floating]) -> None:
         """An exact match in the reference set should return ≈ 0."""
         ref_matrix = np.stack([sample_embedding, sample_embedding * 0.5])
         dist = min_distance_to_references(sample_embedding, ref_matrix)
@@ -191,9 +191,7 @@ class TestMinDistanceToReferences:
         expected = cosine_distance(sample_embedding, similar_embedding)
         assert dist == pytest.approx(expected, abs=1e-6)
 
-    def test_single_reference(
-        self, sample_embedding: NDArray[np.floating]
-    ) -> None:
+    def test_single_reference(self, sample_embedding: NDArray[np.floating]) -> None:
         """Works with a single reference embedding."""
         other = np.ones_like(sample_embedding)
         other /= np.linalg.norm(other)
@@ -202,10 +200,8 @@ class TestMinDistanceToReferences:
         expected = cosine_distance(sample_embedding, other)
         assert dist == pytest.approx(expected, abs=1e-6)
 
-    def test_returns_python_float(
-        self, sample_embedding: NDArray[np.floating]
-    ) -> None:
+    def test_returns_python_float(self, sample_embedding: NDArray[np.floating]) -> None:
         """Return type should be a native Python float."""
         ref_matrix = np.stack([sample_embedding])
         result = min_distance_to_references(sample_embedding, ref_matrix)
-        assert type(result) is float
+        assert isinstance(result, float)

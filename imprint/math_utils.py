@@ -34,9 +34,7 @@ def cosine_distance(a: NDArray[np.floating], b: NDArray[np.floating]) -> float:
     b_flat = b.flatten().astype(np.float64)
 
     if a_flat.shape != b_flat.shape:
-        raise ValueError(
-            f"Vector length mismatch: {a_flat.shape[0]} vs {b_flat.shape[0]}"
-        )
+        raise ValueError(f"Vector length mismatch: {a_flat.shape[0]} vs {b_flat.shape[0]}")
 
     norm_a = np.linalg.norm(a_flat)
     norm_b = np.linalg.norm(b_flat)
@@ -62,13 +60,14 @@ def cosine_distance_matrix(
     """
     try:
         from scipy.spatial.distance import pdist, squareform
-        return squareform(pdist(embeddings, metric="cosine")).astype(np.float64)
+
+        return squareform(pdist(embeddings, metric="cosine")).astype(np.float64)  # type: ignore[no-any-return]
     except ImportError:
         # Vectorised numpy fallback
         norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
         normalised = embeddings / (norms + COSINE_EPSILON)
         similarity_matrix = normalised @ normalised.T
-        return (1.0 - similarity_matrix).astype(np.float64)
+        return (1.0 - similarity_matrix).astype(np.float64)  # type: ignore[no-any-return]
 
 
 def find_medoid_index(distance_matrix: NDArray[np.floating]) -> int:
@@ -110,8 +109,6 @@ def min_distance_to_references(
     target_norm = np.linalg.norm(target_flat)
     ref_norms = np.linalg.norm(refs, axis=1)
 
-    similarities = np.dot(refs, target_flat) / (
-        ref_norms * target_norm + COSINE_EPSILON
-    )
+    similarities = np.dot(refs, target_flat) / (ref_norms * target_norm + COSINE_EPSILON)
     distances = 1.0 - similarities
     return float(np.min(distances))

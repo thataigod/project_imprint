@@ -36,7 +36,11 @@ jobs:
     - name: Lint with ruff
       run: |
         ruff check imprint/ tests/
-        
+
+    - name: Run mypy type checker
+      run: |
+        mypy imprint/
+
     - name: Run tests with pytest
       run: |
         xvfb-run -a pytest tests/ -v --cov=imprint --cov-fail-under=100
