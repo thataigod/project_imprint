@@ -23,7 +23,6 @@ class EventType(Enum):
         MESSAGE: Request to show a modal messagebox (level + text).
         HALTED: Analysis could not start; engine is idle.
         FINISHED: Analysis completed (successfully or after cancel).
-        LOG: A log record forwarded for the GUI log panel.
     """
 
     PROGRESS = auto()
@@ -31,7 +30,6 @@ class EventType(Enum):
     MESSAGE = auto()
     HALTED = auto()
     FINISHED = auto()
-    LOG = auto()
 
 
 class MessageLevel(Enum):

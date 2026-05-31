@@ -16,7 +16,7 @@ class TestEventType:
 
     def test_all_expected_members_exist(self) -> None:
         """All expected event types should be defined."""
-        expected = {"PROGRESS", "STATUS", "MESSAGE", "HALTED", "FINISHED", "LOG"}
+        expected = {"PROGRESS", "STATUS", "MESSAGE", "HALTED", "FINISHED"}
         actual = {member.name for member in EventType}
         assert expected == actual
 
