@@ -72,7 +72,14 @@ if exist "%INSTALL_RECEIPT%" (
 
 echo.
 echo  [1/3] Checking Python installation...
-python --version >nul 2>&1
+py -3.10 --version >nul 2>&1
+if %errorlevel% equ 0 (
+    set "PYTHON_EXE=py -3.10"
+) else (
+    set "PYTHON_EXE=python"
+)
+
+%PYTHON_EXE% --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo  [ERROR] Python is not installed or not in your system PATH.
     echo          Install Python %MIN_PYTHON_MAJOR%.%MIN_PYTHON_MINOR%+ from https://python.org
@@ -82,13 +89,13 @@ if %errorlevel% neq 0 (
 )
 
 :: Verify minimum version
-for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set "PY_VERSION=%%v"
+for /f "tokens=2 delims= " %%v in ('%PYTHON_EXE% --version 2^>^&1') do set "PY_VERSION=%%v"
 echo        Found Python %PY_VERSION%
 
 :: Create or verify virtual environment
 if not exist "%VENV_NAME%\Scripts\activate.bat" (
     echo  [2/3] Creating virtual environment '%VENV_NAME%'...
-    python -m venv "%VENV_NAME%"
+    %PYTHON_EXE% -m venv "%VENV_NAME%"
     if %errorlevel% neq 0 (
         echo  [ERROR] Failed to create virtual environment.
         echo          Check disk space and permissions.
