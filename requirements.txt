@@ -3,7 +3,7 @@
 
 # Core face analysis
 insightface>=0.7.3
-onnxruntime-gpu==1.15.1
+onnxruntime-gpu>=1.24.1
 
 # Image and data processing
 numpy>=1.24.0,<2.0.0
