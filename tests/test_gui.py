@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import tkinter as tk
 
-import pytest
-
 from imprint.gui.app import Application
 
 
@@ -20,13 +18,13 @@ class TestApplicationGUI:
         """The main window should initialize and destroy without crashing."""
         # Create the app (this builds all widgets and variables)
         app = Application()
-        
+
         # Verify it is a valid Tk instance
         assert isinstance(app, tk.Tk)
         assert "Imprint" in app.title()
-        
+
         # Call update to process any pending geometry/draw events
         app.update()
-        
+
         # Destroy the app cleanly
         app.destroy()
