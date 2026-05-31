@@ -6,9 +6,11 @@ mock face analysers, and settings objects.
 
 from __future__ import annotations
 
+import contextlib
 import threading
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -139,3 +141,51 @@ def default_analysis_settings() -> AnalysisSettings:
 def cancel_event() -> threading.Event:
     """Return a fresh threading.Event for cancellation."""
     return threading.Event()
+
+
+_shared_root: Any = None
+_has_display: bool | None = None
+
+
+def check_display() -> bool:
+    """Return True if Tkinter can initialize a display backend, False otherwise."""
+    global _shared_root, _has_display
+    if _has_display is not None:
+        return _has_display
+
+    try:
+        import tkinter as tk
+        from tkinter import ttk
+
+        _shared_root = tk.Tk()
+        _ = ttk.Button(_shared_root)
+        _has_display = True
+    except Exception:
+        if _shared_root is not None:
+            with contextlib.suppress(Exception):
+                _shared_root.destroy()
+            _shared_root = None
+        _has_display = False
+    return _has_display
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Clean up the shared verification root window at the end of the test session."""
+    global _shared_root
+    if _shared_root is not None:
+        with contextlib.suppress(Exception):
+            _shared_root.destroy()
+        _shared_root = None
+
+
+def pytest_runtest_setup(item: pytest.Item) -> None:
+    """Skip GUI-related tests if no display is available."""
+    gui_test_modules = {"test_gui", "test_gui_app", "test_widgets", "test_tooltips"}
+    module_name = item.module.__name__.split(".")[-1]
+    if module_name in gui_test_modules and not check_display():
+        pytest.skip(
+            f"Skipping GUI test '{item.name}': No display environment or Tcl/Tk is not available."
+        )
+
+
+
