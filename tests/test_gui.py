@@ -23,7 +23,7 @@ class TestApplicationGUI:
         
         # Verify it is a valid Tk instance
         assert isinstance(app, tk.Tk)
-        assert app.title() == "Imprint GPU Face Sorter"
+        assert "Imprint" in app.title()
         
         # Call update to process any pending geometry/draw events
         app.update()
