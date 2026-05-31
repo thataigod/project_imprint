@@ -2,10 +2,10 @@
 # Install with: pip install -r requirements.txt
 
 # Core face analysis
-insightface>=0.7.3
-onnxruntime-gpu>=1.15.1
+insightface>=0.7.3,<0.8.0
+onnxruntime-gpu>=1.15.1,<2.0.0
 
 # Image and data processing
 numpy>=1.24.0,<2.0.0
-opencv-python>=4.8.0
-scipy>=1.10.0
+opencv-python>=4.8.0,<5.0.0
+scipy>=1.10.0,<2.0.0

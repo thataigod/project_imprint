@@ -68,9 +68,6 @@ class AppSettings:
 # Validation helpers
 # ---------------------------------------------------------------------------
 
-class ConfigValidationError(ValueError):
-    """Raised when a configuration value is out of range or invalid."""
-
 
 def validate_analysis_settings(settings: AnalysisSettings) -> list[str]:
     """Validate numeric analysis settings and return a list of error strings.
