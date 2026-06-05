@@ -178,50 +178,90 @@ class TestValidatePathSettings:
 
     def test_valid_paths_return_no_errors(self, tmp_path: Path) -> None:
         """Valid, non-overlapping paths should produce no errors."""
+        ref = tmp_path / "ref"
+        src = tmp_path / "src"
+        ref.mkdir()
+        src.mkdir()
         settings = PathSettings(
-            reference_folder=str(tmp_path / "ref"),
-            source_folder=str(tmp_path / "src"),
+            reference_folder=str(ref),
+            source_folder=str(src),
             destination_folder=str(tmp_path / "dst"),
         )
         errors = validate_path_settings(settings)
         assert errors == []
 
-    def test_empty_reference_folder(self) -> None:
+    def test_paths_must_exist(self, tmp_path: Path) -> None:
+        """Non-existent reference or source folders should produce errors."""
+        settings = PathSettings(
+            reference_folder=str(tmp_path / "nonexistent_ref"),
+            source_folder=str(tmp_path / "nonexistent_src"),
+            destination_folder=str(tmp_path / "dst"),
+        )
+        errors = validate_path_settings(settings)
+        assert any("Reference folder does not exist" in e for e in errors)
+        assert any("Source folder does not exist" in e for e in errors)
+
+    def test_empty_reference_folder(self, tmp_path: Path) -> None:
         """An empty reference folder should produce an error."""
-        settings = PathSettings(source_folder="/src", destination_folder="/dst")
+        src = tmp_path / "src"
+        src.mkdir()
+        settings = PathSettings(
+            reference_folder="",
+            source_folder=str(src),
+            destination_folder=str(tmp_path / "dst"),
+        )
         errors = validate_path_settings(settings)
         assert any("reference" in e.lower() for e in errors)
 
-    def test_empty_source_folder(self) -> None:
+    def test_empty_source_folder(self, tmp_path: Path) -> None:
         """An empty source folder should produce an error."""
-        settings = PathSettings(reference_folder="/ref", destination_folder="/dst")
+        ref = tmp_path / "ref"
+        ref.mkdir()
+        settings = PathSettings(
+            reference_folder=str(ref),
+            source_folder="",
+            destination_folder=str(tmp_path / "dst"),
+        )
         errors = validate_path_settings(settings)
         assert any("source" in e.lower() for e in errors)
 
-    def test_empty_destination_folder(self) -> None:
+    def test_empty_destination_folder(self, tmp_path: Path) -> None:
         """An empty destination folder should produce an error."""
-        settings = PathSettings(reference_folder="/ref", source_folder="/src")
+        ref = tmp_path / "ref"
+        ref.mkdir()
+        src = tmp_path / "src"
+        src.mkdir()
+        settings = PathSettings(
+            reference_folder=str(ref),
+            source_folder=str(src),
+            destination_folder="",
+        )
         errors = validate_path_settings(settings)
         assert any("destination" in e.lower() for e in errors)
 
     def test_source_equals_destination(self, tmp_path: Path) -> None:
         """Source = destination should produce an error."""
-        same = str(tmp_path / "same")
+        ref = tmp_path / "ref"
+        ref.mkdir()
+        same = tmp_path / "same"
+        same.mkdir()
         settings = PathSettings(
-            reference_folder=str(tmp_path / "ref"),
-            source_folder=same,
-            destination_folder=same,
+            reference_folder=str(ref),
+            source_folder=str(same),
+            destination_folder=str(same),
         )
         errors = validate_path_settings(settings)
         assert any("different" in e.lower() for e in errors)
 
     def test_destination_inside_source(self, tmp_path: Path) -> None:
         """Destination inside source should produce an error."""
+        ref = tmp_path / "ref"
+        ref.mkdir()
         src = tmp_path / "source"
         src.mkdir()
         dst = src / "output"
         settings = PathSettings(
-            reference_folder=str(tmp_path / "ref"),
+            reference_folder=str(ref),
             source_folder=str(src),
             destination_folder=str(dst),
         )
@@ -230,11 +270,14 @@ class TestValidatePathSettings:
 
     def test_reference_equals_destination(self, tmp_path: Path) -> None:
         """Reference = destination should produce an error."""
-        same = str(tmp_path / "same")
+        same = tmp_path / "same"
+        same.mkdir()
+        src = tmp_path / "src"
+        src.mkdir()
         settings = PathSettings(
-            reference_folder=same,
-            source_folder=str(tmp_path / "src"),
-            destination_folder=same,
+            reference_folder=str(same),
+            source_folder=str(src),
+            destination_folder=str(same),
         )
         errors = validate_path_settings(settings)
         assert any("different" in e.lower() for e in errors)

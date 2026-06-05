@@ -32,4 +32,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    sys.exit(main())  # type: ignore[func-returns-value]
+    sys.exit(main())  # type: ignore[func-returns-value]  # sys.exit accepts None, but mypy warns on void return type

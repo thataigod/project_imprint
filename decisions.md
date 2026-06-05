@@ -61,3 +61,10 @@ This document outlines the key technical decisions taken during the rebuild and 
 ## 9. Windows pytest stdout redirection bug and the `-s` flag
 *   **Decision**: For local test runs on Windows, the `-s` flag (no stdout/stderr capture, e.g. `pytest tests/ --cov=imprint -s`) must be used.
 *   **Why**: Standard pytest runs capture standard streams, which can corrupt file descriptor references in Windows Tkinter/Tcl handles during repeated setup/teardowns, leading to initialization crashes. Running without capture (-s) resolves this platform-specific friction.
+
+---
+
+## 10. `TclError` String Comparison in App Startup
+*   **Decision**: In `imprint/__main__.py`, we catch startup exceptions and check if `type(exc).__name__ == "TclError"`.
+*   **Why**: Importing `tkinter.TclError` at the module level would defeat the purpose of the lazy import inside the `try` block, as `tkinter` itself might not be importable (for example, on headless systems or installations without Tk). Therefore, comparing the exception's class name string is the most robust way to identify `TclError` without needing a pre-emptive import of `tkinter`.
+

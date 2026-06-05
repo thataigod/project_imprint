@@ -61,13 +61,13 @@ def cosine_distance_matrix(
     try:
         from scipy.spatial.distance import pdist, squareform
 
-        return squareform(pdist(embeddings, metric="cosine")).astype(np.float64)  # type: ignore[no-any-return]
+        return squareform(pdist(embeddings, metric="cosine")).astype(np.float64)  # type: ignore[no-any-return]  # scipy stubs return Any
     except ImportError:
         # Vectorised numpy fallback
         norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
         normalised = embeddings / (norms + COSINE_EPSILON)
         similarity_matrix = normalised @ normalised.T
-        return (1.0 - similarity_matrix).astype(np.float64)  # type: ignore[no-any-return]
+        return (1.0 - similarity_matrix).astype(np.float64)  # type: ignore[no-any-return]  # ndarray.astype returns Any to mypy
 
 
 def find_medoid_index(distance_matrix: NDArray[np.floating]) -> int:
