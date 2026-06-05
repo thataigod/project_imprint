@@ -52,12 +52,10 @@ class FaceResult(Protocol):
     """Minimal interface for a single detected face."""
 
     @property
-    def det_score(self) -> float:
-        ...  # noqa: E704
+    def det_score(self) -> float: ...  # noqa: E704
 
     @property
-    def embedding(self) -> NDArray[np.floating]:
-        ...  # noqa: E704
+    def embedding(self) -> NDArray[np.floating]: ...  # noqa: E704
 
 
 @runtime_checkable
@@ -68,11 +66,9 @@ class FaceAnalyser(Protocol):
     lightweight mock during unit tests — no GPU or model download needed.
     """
 
-    def prepare(self, ctx_id: int, det_size: tuple[int, int]) -> None:
-        ...  # noqa: E704
+    def prepare(self, ctx_id: int, det_size: tuple[int, int]) -> None: ...  # noqa: E704
 
-    def get(self, img: NDArray[Any]) -> list[FaceResult]:
-        ...  # noqa: E704
+    def get(self, img: NDArray[Any]) -> list[FaceResult]: ...  # noqa: E704
 
 
 # Type alias for the event callback
@@ -214,7 +210,7 @@ class SorterEngine:
             app.prepare(ctx_id=0, det_size=DEFAULT_DETECTION_SIZE)
             logger.info("Model '%s' loaded successfully.", model_name)
             self._analyser = app
-            return app  # type: ignore[no-any-return]
+            return app  # type: ignore[no-any-return]  # InsightFace returns untyped Any
         except Exception as exc:
             logger.error("Failed to load model '%s': %s", model_name, exc)
             self._emit(
@@ -425,6 +421,15 @@ class SorterEngine:
                 dest_dir.mkdir(parents=True, exist_ok=True)
 
                 dest_path = self._unique_dest_path(dest_dir, image_path.name, used_names)
+
+                # Guard against path traversal via crafted filenames
+                if not dest_path.resolve().is_relative_to(dest_root.resolve()):
+                    logger.error(  # pragma: no cover
+                        "Blocked path traversal attempt: %s",  # pragma: no cover
+                        image_path.name,  # pragma: no cover
+                    )  # pragma: no cover
+                    return False, False, True  # pragma: no cover
+
                 logger.info(
                     "MATCH: %s (score=%.4f) -> %s",
                     image_path.name,
@@ -469,6 +474,7 @@ class SorterEngine:
         match_count = 0
         error_count = 0
         skip_count = 0
+        end = 0  # Initialise before loop to prevent unbound reference
         used_names: dict[Path, int] = {}  # Track duplicate basenames
 
         num_batches = math.ceil(total / batch_size)

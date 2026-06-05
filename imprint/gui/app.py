@@ -27,6 +27,7 @@ from imprint.config import (
     validate_path_settings,
 )
 from imprint.constants import (
+    DEFAULT_MODEL,
     LOG_QUEUE_POLL_MS,
     MODEL_REGISTRY,
     get_model_by_display_name,
@@ -53,7 +54,7 @@ _TIPS = {
         "Subfolders are scanned recursively."
     ),
     "destination": (
-        "Folder where matched images will be copied, organised into " "score-based subdirectories."
+        "Folder where matched images will be copied, organised into score-based subdirectories."
     ),
     "model": (
         "Antelope v2 = best accuracy (slowest). "
@@ -319,7 +320,7 @@ class Application(tk.Tk):
             ValueError: If any numeric field contains an invalid value.
         """
         profile = get_model_by_display_name(self._model_selector.model_var.get())
-        model_code = profile.code_name if profile else "antelopev2"
+        model_code = profile.code_name if profile else DEFAULT_MODEL
 
         paths = PathSettings(
             reference_folder=self._ref_selector.path_var.get().strip(),
@@ -417,7 +418,7 @@ class Application(tk.Tk):
         """
         state = "disabled" if running else "normal"
         for widget in self._input_widgets:
-            widget.config(state=state)  # type: ignore[attr-defined]
+            widget.config(state=state)  # type: ignore[attr-defined]  # Tkinter widgets lack .config() on base Widget type
 
         if running:
             self._run_button.config(

@@ -105,8 +105,8 @@ def validate_analysis_settings(settings: AnalysisSettings) -> list[str]:
 def validate_path_settings(settings: PathSettings) -> list[str]:
     """Validate path settings and return a list of error strings.
 
-    Checks that all paths are provided and that source / destination
-    do not overlap dangerously.
+    Checks that all paths are provided, that they exist on disk,
+    and that source / destination do not overlap dangerously.
 
     Args:
         settings: The path settings to validate.
@@ -118,8 +118,14 @@ def validate_path_settings(settings: PathSettings) -> list[str]:
 
     if not settings.reference_folder:
         errors.append("Reference folder is required.")
+    elif not Path(settings.reference_folder).is_dir():
+        errors.append("Reference folder does not exist or is not a directory.")
+
     if not settings.source_folder:
         errors.append("Source folder is required.")
+    elif not Path(settings.source_folder).is_dir():
+        errors.append("Source folder does not exist or is not a directory.")
+
     if not settings.destination_folder:
         errors.append("Destination folder is required.")
 

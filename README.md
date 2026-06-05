@@ -190,6 +190,7 @@ ruff check imprint/ tests/
 | `requirements.txt` | Pinned production dependencies |
 | `requirements-dev.txt` | Development/test dependencies |
 | `.gitignore` | Excludes venv, config, caches, logs |
+| [`decisions.md`](decisions.md) | Architectural & testing decisions rationale |
 
 ## Tech Stack
 
