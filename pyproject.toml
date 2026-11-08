@@ -38,6 +38,7 @@ imprint = "imprint.__main__:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 99
@@ -48,10 +49,11 @@ select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
 ignore = ["E501", "SIM117"]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 
 [tool.mypy]
 python_version = "3.10"
+mypy_path = "src"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

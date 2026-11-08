@@ -51,6 +51,6 @@ def test_configure_logging(tmp_path: Path) -> None:
     assert len(logger.handlers) == 3
 
     # Verify fallback when log_dir is None
-    with patch("imprint.logging_setup.Path.cwd", return_value=tmp_path):
+    with patch("imprint.platform.logging.Path.cwd", return_value=tmp_path):
         logger_none = configure_logging(log_queue, log_dir=None)
         assert len(logger_none.handlers) == 3

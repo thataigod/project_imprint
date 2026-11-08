@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from imprint.constants import COSINE_EPSILON
+from imprint.domain.constants import COSINE_EPSILON
 
 
 def cosine_distance(a: NDArray[np.floating], b: NDArray[np.floating]) -> float:

@@ -25,20 +25,20 @@ import cv2
 import numpy as np
 from numpy.typing import NDArray
 
-from imprint.config import AnalysisSettings, PathSettings
-from imprint.constants import (
+from imprint.domain.constants import (
     DEFAULT_DETECTION_SIZE,
     MIN_REFERENCE_FACES,
     ONNX_PROVIDERS,
     SUPPORTED_EXTENSIONS,
 )
-from imprint.events import EngineEvent, MessageLevel
-from imprint.math_utils import (
+from imprint.domain.math import (
     cosine_distance,
     cosine_distance_matrix,
     find_medoid_index,
     min_distance_to_references,
 )
+from imprint.domain.settings import AnalysisSettings, PathSettings
+from imprint.events.types import EngineEvent, MessageLevel
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +191,7 @@ class SorterEngine:
             from insightface.app import FaceAnalysis
 
             model_profile = None
-            from imprint.constants import MODEL_REGISTRY
+            from imprint.domain.constants import MODEL_REGISTRY
 
             model_profile = MODEL_REGISTRY.get(model_name)
 

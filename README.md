@@ -2,6 +2,8 @@
 
 A high-performance, GPU-accelerated desktop application for sorting images based on facial similarity. Powered by state-of-the-art face recognition models, Imprint automatically identifies faces in your photos and organises them into scored subdirectories with a single click.
 
+> **v6 modernization in progress** — this branch moves the package to a `src/` layout and prepares the PySide6/QML rewrite. The Tkinter application remains fully functional during the transition. See [`docs/adr/0001-v6-modern-rewrite.md`](docs/adr/0001-v6-modern-rewrite.md).
+
 ## Features
 
 - **State-of-the-Art Recognition** — Choose from multiple InsightFace models: *Antelope v2* (maximum accuracy), *Buffalo L* (balanced), or *Buffalo S* (fastest).
@@ -40,21 +42,19 @@ project_imprint/
 ├── start.bat
 ├── run.py
 ├── requirements.txt
-├── imprint/
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── config.py
-│   ├── constants.py
-│   ├── engine.py
-│   ├── events.py
-│   ├── logging_setup.py
-│   ├── math_utils.py
-│   └── gui/
+├── src/
+│   └── imprint/
 │       ├── __init__.py
+│       ├── __main__.py
 │       ├── app.py
-│       ├── tooltips.py
-│       └── widgets.py
+│       ├── domain/       # constants, settings, math
+│       ├── engine/       # sorter engine (v5 legacy during transition)
+│       ├── events/       # typed engine events
+│       ├── gui/          # legacy Tkinter interface
+│       ├── platform/     # config persistence, logging
+│       └── ui/           # v6 PySide6/QML interface
 └── tests/
+    ├── unit/
     └── ...
 ```
 
@@ -130,21 +130,30 @@ If the closest distance to any reference is below the threshold, the image is co
 The application is split into focused, testable modules:
 
 ```
-imprint/
+src/imprint/
 ├── __init__.py          # Package metadata and version
 ├── __main__.py          # python -m imprint entry point
-├── constants.py         # Named constants, model registry
-├── config.py            # ConfigManager with typed dataclasses + validation
-├── engine.py            # SorterEngine with Protocol-based DI
-├── events.py            # Typed event system (Enum + dataclass)
-├── logging_setup.py     # QueueHandler + rotating file handler
-├── math_utils.py        # Vectorised cosine distance functions
-└── gui/
-    ├── __init__.py
-    ├── app.py           # Main Application window
-    ├── tooltips.py      # ToolTip widget
-    └── widgets.py       # PathSelector, SettingEntry, ModelSelector
+├── app.py               # v6 composition root (placeholder)
+├── domain/
+│   ├── constants.py     # Named constants, model registry
+│   ├── settings.py      # Typed settings + validation
+│   └── math.py          # Vectorised cosine distance functions
+├── engine/
+│   ├── __init__.py      # Public engine exports
+│   └── legacy.py        # v5 SorterEngine during the transition
+├── events/
+│   ├── __init__.py      # Public event exports
+│   └── types.py         # Typed event system (Enum + dataclass)
+├── platform/
+│   ├── config.py        # ConfigManager (same INI contract)
+│   └── logging.py       # QueueHandler + rotating file handler
+├── gui/                 # Legacy Tkinter interface
+└── ui/                  # v6 PySide6/QML interface (placeholder)
 ```
+
+Legacy import paths such as `imprint.config`, `imprint.constants`,
+`imprint.events`, `imprint.math_utils`, and `imprint.logging_setup` remain
+available as compatibility shims until the QML front end reaches parity.
 
 ### Design Principles
 
@@ -177,7 +186,7 @@ python -m pytest tests/ --cov=imprint --cov-report=term-missing
 ### Linting
 
 ```bash
-ruff check imprint/ tests/
+ruff check src/imprint/ tests/
 ```
 
 ## Project Files

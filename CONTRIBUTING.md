@@ -31,12 +31,12 @@ This project is built using Python 3.10. Ensure you have the recommended environ
 We enforce strict linting, formatting, and static typing:
 * **Linting & Formatting**: We use `ruff`. Run it locally via:
   ```bash
-  ruff check imprint/ tests/
-  ruff format imprint/ tests/
+  ruff check src/imprint/ tests/
+  ruff format src/imprint/ tests/
   ```
 * **Static Typing**: We use `mypy` with strict configuration parameters. Run it locally via:
   ```bash
-  mypy imprint/
+  mypy src/imprint/
   ```
 
 Pre-commit hooks will automatically run `ruff` and `mypy` on files modified during commit.
