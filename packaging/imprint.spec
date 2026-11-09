@@ -19,6 +19,7 @@ EXCLUDES = [
     "pytest",
     "_pytest",
     "sklearn",
+    "tkinter",
 ]
 
 UNUSED_STYLE_DLLS = {

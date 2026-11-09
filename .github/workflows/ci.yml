@@ -26,7 +26,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1 xvfb
+        sudo apt-get install -y libgl1
         
     - name: Install dependencies
       run: |
@@ -49,4 +49,4 @@ jobs:
 
     - name: Run tests with pytest
       run: |
-        xvfb-run -a pytest tests/ -v --cov=imprint --cov-fail-under=100
+        pytest tests/ -v --cov=imprint --cov-fail-under=100

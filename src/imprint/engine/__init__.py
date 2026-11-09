@@ -1,7 +1,7 @@
 """Face-sorting engine package.
 
-``EngineV6`` is the new pipeline.  ``SorterEngine`` remains an alias for
-the v5 implementation until the QML front end reaches parity.
+``EngineV6`` is the production pipeline.  ``SorterEngine`` remains an alias
+for the v5 implementation, retained as a parity and benchmark fixture.
 """
 
 from imprint.domain.results import ImageStatus, MatchRecord, RunSummary

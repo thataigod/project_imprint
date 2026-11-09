@@ -59,16 +59,11 @@ We enforce a **100% test coverage target** in the CI pipeline.
   pytest tests/ --cov=imprint --cov-fail-under=100
   ```
 
-### Platform-Specific Testing Rules
+### Headless Qt Tests
 
-> [!IMPORTANT]
-> **Windows stdout/stderr Capture Bug**:
-> Standard pytest runs capture standard streams, which can corrupt file descriptor references in Windows Tkinter/Tcl handles during repeated setup/teardowns, leading to initialization crashes.
-> 
-> When running pytest locally on Windows, you **MUST** pass the `-s` flag to disable stdout/stderr capture:
-> ```bash
-> pytest tests/ --cov=imprint --cov-fail-under=100 -s
-> ```
+Qt tests automatically set `QT_QPA_PLATFORM=offscreen` in `tests/ui/conftest.py`, so no
+display server is required. The `-s` flag remains useful for verbose local output but is
+not required.
 
 ---
 

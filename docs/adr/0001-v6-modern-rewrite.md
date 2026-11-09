@@ -83,9 +83,9 @@ tests/
 └── ui/          # pytest-qt interaction tests
 ```
 
-The legacy Tkinter code remains import-compatible during the transition through
-thin re-export modules. It is removed after the parity harness passes and the
-QML interface reaches feature parity.
+The legacy Tkinter UI has been removed. Thin compatibility modules keep the
+historical `imprint.*` import paths available for downstream integrations, while
+the v5 engine remains as a parity and benchmark fixture.
 
 ## Migration Plan
 
@@ -93,8 +93,8 @@ QML interface reaches feature parity.
 1. `src/` scaffold; port constants, settings, events, and math with tests.
 2. New engine pipeline, analyser protocol, batching, cache, and parity harness.
 3. QML shell, folder workflow, settings, live results, summary, and log drawer.
-4. `uv` lockfile, PyInstaller build, installer, model prefetch, clean-machine test.
-5. Coverage, GPU smoke tests, performance benchmark, documentation, legacy removal.
+4. PyInstaller build, Inno Setup installer, model prefetch, packaged-app self-test.
+5. Python 3.12, audit, benchmarks, bundle trimming, docs, legacy UI removal.
 
 ## Implementation Status
 
@@ -104,11 +104,10 @@ QML interface reaches feature parity.
   rich events, and a legacy-versus-v6 parity harness.
 - **Phase 3** complete: PySide6/QML interface, Qt bridge, live results grid, settings,
   drag-and-drop folder cards, activity log, summary, themes, and worker lifecycle.
-  The QML interface is previewable with `python run.py --qml`.
-- **Phase 4** complete: the QML interface is the default entry point; `--legacy`
-  retains the Tkinter interface during the transition. Existing `config.ini`
-  files are loaded directly by the Qt bridge. Legacy removal is deferred until
-  the final release.
+  The QML interface is launchable with `python run.py`.
+- **Phase 4** complete: the QML interface became the default entry point while
+  `--legacy` retained the Tkinter interface during the transition. Existing
+  `config.ini` files are loaded directly by the Qt bridge.
 - **Phase 5** complete: the runtime is Python 3.12, the lockfile is regenerated
   and passes `pip-audit`, and the PyInstaller one-directory build plus per-user
   Inno Setup installer are verified. InsightFace 0.7.3 has no cp312 wheel, so a
@@ -118,7 +117,11 @@ QML interface reaches feature parity.
   SQLite writes improved cold-cache overhead; 1,000-image and 300-image stress
   runs pass; the bundled app has a `--self-test` gate; unused Qt styles and
   packages are pruned (~38 MB unpacked / ~21 MB installer); and the security audit
-  is clean. Phase 7 is the release/documentation pass.
+  is clean.
+- **Phase 7** complete: the Tkinter interface and `--legacy` switch are removed,
+  release documentation and the changelog are written, and the final package and
+  installer are verified. The final unpacked bundle is about 1.60 GB and the
+  per-user installer is about 542 MB.
 
 ## Verification
 

@@ -169,7 +169,7 @@ def main(argv: list[str] | None = None) -> int:
 
         print(f"Images: {args.images}")
         print(f"Inference delay: {args.inference_ms:.1f} ms/image")
-        print(f"Legacy engine:        {legacy_time:.3f}s")
+        print(f"v5 engine:            {legacy_time:.3f}s")
         print(f"v6 cold cache:        {v6_cold:.3f}s")
         print(f"v6 warm cache:        {v6_warm:.3f}s ({cached_count} cache hits)")
         if v6_warm > 0:

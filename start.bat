@@ -7,8 +7,6 @@
 ::   4. Application launch
 ::
 :: Usage: Double-click this file or run from a terminal.
-::        start.bat             -> v6 QML interface
-::        start.bat --legacy    -> legacy Tkinter interface
 :: ============================================================================
 @echo off
 setlocal enabledelayedexpansion

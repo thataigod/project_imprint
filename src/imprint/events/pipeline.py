@@ -1,7 +1,7 @@
 """Rich pipeline events consumed by the v6 UI.
 
 These events are intentionally separate from the v5 ``EngineEvent`` so
-the legacy UI and tests keep their exact contract during the migration.
+parity and benchmark fixtures keep their exact contract.
 """
 
 from __future__ import annotations
