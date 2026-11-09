@@ -13,6 +13,40 @@ ROOT = Path(SPECPATH).parent
 SRC = ROOT / "src"
 ICON = ROOT / "packaging" / "imprint.ico"
 
+EXCLUDES = [
+    "Cython",
+    "matplotlib",
+    "pytest",
+    "_pytest",
+    "sklearn",
+]
+
+UNUSED_STYLE_DLLS = {
+    "Qt6LabsStyleKit.dll",
+    "Qt6QuickControls2FluentWinUI3.dll",
+    "Qt6QuickControls2FluentWinUI3StyleImpl.dll",
+    "Qt6QuickControls2Fusion.dll",
+    "Qt6QuickControls2FusionStyleImpl.dll",
+    "Qt6QuickControls2Imagine.dll",
+    "Qt6QuickControls2ImagineStyleImpl.dll",
+    "Qt6QuickControls2Material.dll",
+    "Qt6QuickControls2MaterialStyleImpl.dll",
+    "Qt6QuickControls2Universal.dll",
+    "Qt6QuickControls2UniversalStyleImpl.dll",
+    "Qt6QuickControls2Windows.dll",
+    "Qt6QuickControls2WindowsStyleImpl.dll",
+}
+
+UNUSED_STYLE_DIRS = {
+    "FluentWinUI3",
+    "Fusion",
+    "Imagine",
+    "Material",
+    "Universal",
+    "Windows",
+    "designer",
+}
+
 datas = []
 qml_root = SRC / "imprint" / "ui" / "qml"
 for qml_file in qml_root.rglob("*"):
@@ -59,10 +93,26 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=EXCLUDES,
     noarchive=False,
     optimize=0,
 )
+
+
+def dest_name(entry):
+    return str(entry[0]).replace("\\", "/")
+
+
+a.binaries = [
+    entry for entry in a.binaries if Path(dest_name(entry)).name not in UNUSED_STYLE_DLLS
+]
+a.datas = [
+    entry
+    for entry in a.datas
+    if not any(
+        f"QtQuick/Controls/{style}/" in dest_name(entry) for style in UNUSED_STYLE_DIRS
+    )
+]
 
 pyz = PYZ(a.pure)
 

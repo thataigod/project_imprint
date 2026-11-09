@@ -40,6 +40,21 @@ def _launch_qml() -> int:
     return qml_main()
 
 
+def _self_test() -> int:
+    """Import critical runtime dependencies for packaged-build verification."""
+    try:
+        import onnxruntime
+        from insightface.app import FaceAnalysis
+        from PySide6.QtCore import qVersion
+    except Exception as exc:
+        print(f"Self-test failed: {exc}", file=sys.stderr)
+        return 1
+
+    if FaceAnalysis is None or not qVersion() or onnxruntime is None:
+        return 1
+    return 0
+
+
 def _launch_legacy() -> int:
     """Launch the legacy Tkinter application."""
     from imprint.gui.app import Application
@@ -52,6 +67,8 @@ def _launch_legacy() -> int:
 def main(argv: Sequence[str] | None = None) -> int:
     """Launch the requested interface and return a process exit code."""
     args = list(sys.argv[1:] if argv is None else argv)
+    if "--self-test" in args:
+        return _self_test()
     if "--legacy" in args:
         try:
             return _launch_legacy()

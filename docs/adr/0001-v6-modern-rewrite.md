@@ -114,6 +114,11 @@ QML interface reaches feature parity.
   Inno Setup installer are verified. InsightFace 0.7.3 has no cp312 wheel, so a
   MinGW-w64-built wheel with bundled runtime DLLs is vendored in `wheelhouse/`;
   packaging does not require a C++ toolchain.
+- **Phase 6** complete: pipeline and cache benchmarks are automated; committed
+  SQLite writes improved cold-cache overhead; 1,000-image and 300-image stress
+  runs pass; the bundled app has a `--self-test` gate; unused Qt styles and
+  packages are pruned (~38 MB unpacked / ~21 MB installer); and the security audit
+  is clean. Phase 7 is the release/documentation pass.
 
 ## Verification
 

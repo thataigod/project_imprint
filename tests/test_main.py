@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import builtins
 import runpy
 import sys
 from unittest.mock import patch
 
 import pytest
 
-from imprint.__main__ import _launch_legacy, _launch_qml, main
+from imprint.__main__ import _launch_legacy, _launch_qml, _self_test, main
 
 
 class TclError(Exception):
@@ -106,3 +107,39 @@ def test_runpy_entrypoint(monkeypatch) -> None:
         with pytest.raises(SystemExit) as exc:
             runpy.run_module("imprint.__main__", run_name="__main__")
     assert exc.value.code == 0
+
+
+def test_main_self_test_dispatch() -> None:
+    with patch("imprint.__main__._self_test", return_value=0) as self_test:
+        assert main(["--self-test"]) == 0
+        self_test.assert_called_once_with()
+
+
+def test_self_test_success() -> None:
+    assert _self_test() == 0
+
+
+def test_self_test_failure(monkeypatch, capsys) -> None:
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name.startswith("insightface"):
+            raise ImportError("missing insightface")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    assert _self_test() == 1
+    assert "Self-test failed" in capsys.readouterr().err
+
+
+def test_self_test_missing_face_analyser(monkeypatch) -> None:
+    import types
+
+    package = types.ModuleType("insightface")
+    package.__path__ = []
+    app_module = types.ModuleType("insightface.app")
+    app_module.FaceAnalysis = None
+    monkeypatch.setitem(sys.modules, "insightface", package)
+    monkeypatch.setitem(sys.modules, "insightface.app", app_module)
+
+    assert _self_test() == 1

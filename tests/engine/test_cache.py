@@ -102,3 +102,17 @@ def test_context_manager_closes_cache(tmp_path: Path) -> None:
         cached = cache.get(image)
         assert cached is not None
         assert cached.embedding.tolist() == [1.0, 2.0]
+
+
+def test_commit_batch_flushes_after_threshold(tmp_path: Path) -> None:
+    image = tmp_path / "image.png"
+    write_image(image, 10)
+    db_path = tmp_path / "cache.sqlite3"
+    writer = EmbeddingCache(db_path, "buffalo_s", commit_every=1)
+    reader = EmbeddingCache(db_path, "buffalo_s", commit_every=1)
+    try:
+        writer.put(image, 0.9, np.array([1.0], dtype=np.float32))
+        assert reader.get(image) is not None
+    finally:
+        reader.close()
+        writer.close()

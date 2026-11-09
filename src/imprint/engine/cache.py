@@ -47,9 +47,17 @@ class EmbeddingCache:
         model_name: Recognition-model key that scopes all entries.
     """
 
-    def __init__(self, filepath: Path, model_name: str) -> None:
+    def __init__(
+        self,
+        filepath: Path,
+        model_name: str,
+        *,
+        commit_every: int = 64,
+    ) -> None:
         self.filepath = filepath
         self.model_name = model_name
+        self._commit_every = max(1, commit_every)
+        self._pending_writes = 0
         if filepath.parent != Path("."):
             filepath.parent.mkdir(parents=True, exist_ok=True)
         self._connection = sqlite3.connect(str(filepath))
@@ -103,12 +111,19 @@ class EmbeddingCache:
                     flat.tobytes(),
                 ),
             )
-            self._connection.commit()
+            self._pending_writes += 1
+            if self._pending_writes >= self._commit_every:
+                self._flush()
         except (OSError, sqlite3.Error) as exc:
             logger.warning("Embedding cache write failed for %s: %s", image_path, exc)
 
+    def _flush(self) -> None:
+        self._connection.commit()
+        self._pending_writes = 0
+
     def close(self) -> None:
-        """Close the underlying database connection."""
+        """Flush pending writes and close the database connection."""
+        self._flush()
         self._connection.close()
 
     def __enter__(self) -> EmbeddingCache:

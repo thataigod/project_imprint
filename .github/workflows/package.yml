@@ -31,6 +31,13 @@ jobs:
       - name: Build application
         run: ./scripts/build_app.ps1 -Python python
 
+      - name: Self-test bundled application
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          ./dist/Imprint/Imprint.exe --self-test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
 

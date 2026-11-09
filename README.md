@@ -223,6 +223,12 @@ Outputs:
 - `dist/installer/Imprint-6.0.0-Setup.exe` — per-user installer (no administrator rights required)
 
 The packaging job also runs in GitHub Actions via `.github/workflows/package.yml`.
+The packaged app accepts `--self-test`, which imports the critical runtime pieces and
+returns a non-zero exit code if the bundle is incomplete.
+
+The PyInstaller spec prunes unused Qt Quick style DLLs and unused Python packages,
+reducing the unpacked application by roughly 38 MB and the installer by roughly 21 MB
+(565 MB -> 544 MB) while preserving the full feature set.
 
 > **Python 3.12 note:** InsightFace 0.7.3 publishes no cp312 wheel. The repository vendors
 > a locally built Windows wheel in `wheelhouse/` (MinGW-w64, runtime DLLs bundled), so the
@@ -230,6 +236,28 @@ The packaging job also runs in GitHub Actions via `.github/workflows/package.yml
 > [`wheelhouse/README.md`](wheelhouse/README.md) for provenance and rebuild steps.
 >
 > The Python 3.12 lockfile passes `pip-audit -r requirements.lock`.
+
+## Performance
+
+The pipeline benchmark uses a deterministic fake analyser, so it measures decoding,
+copying, cache, and orchestration overhead without requiring a GPU:
+
+```bash
+python scripts/benchmark_engine.py --images 1000 --inference-ms 2
+```
+
+Sample development-machine result with 1,000 generated images:
+
+```text
+Legacy engine:        3.697s
+v6 cold cache:        4.000s
+v6 warm cache:        0.978s (1000 cache hits)
+Cache speedup:        4.09x
+Python peak memory:   2.5 MiB
+```
+
+With larger 256x256 images the overlapped decoder also beats the sequential v5
+pipeline on a cold run (1.181s versus 1.358s for 300 images).
 
 ## Project Files
 
