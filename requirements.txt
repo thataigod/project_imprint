@@ -1,20 +1,25 @@
 # requirements.txt — Production Dependencies
-# Install with: pip install -r requirements.txt
+# Install from the project root with: pip install -r requirements.txt
+
+# Prebuilt InsightFace wheel for Python 3.12 on Windows (avoids a compiler).
+--find-links wheelhouse
 
 # Core face analysis
 insightface>=0.7.3,<0.8.0
-onnxruntime-gpu>=1.15.1,<2.0.0
+onnxruntime-gpu>=1.23.2,<1.24.0
 
 # Image and data processing
 numpy>=1.24.0,<2.0.0
+scipy>=1.10.0,<1.18.0
 opencv-python>=4.8.0,<5.0.0
 
 # v6 desktop interface
 PySide6-Essentials>=6.8.0,<7.0.0
 
 # Security overrides for transient dependencies
-pillow>=12.2.0
+pillow>=13.0.0
 requests>=2.33.0
 protobuf>=5.29.6
-
-
+onnx>=1.22.0
+certifi>=2026.10.18
+urllib3>=2.8.0

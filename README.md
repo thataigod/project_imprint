@@ -24,7 +24,7 @@ A high-performance, GPU-accelerated desktop application for sorting images based
 |---|---|
 | **OS** | Windows 10 / 11 |
 | **GPU** | NVIDIA with CUDA support |
-| **Python** | 3.9 or later, added to PATH |
+| **Python** | 3.12, added to PATH |
 | **CUDA Toolkit** | Version 12.x (12.8 recommended) |
 | **cuDNN** | 9.x for CUDA 12.x |
 
@@ -66,7 +66,7 @@ project_imprint/
 ### 3. Launch
 
 Double-click **`start.bat`**. On first run it will:
-1. Check for Python ≥ 3.9
+1. Check for Python 3.12
 2. Create a virtual environment (`imprint_env/`)
 3. Install all dependencies from `requirements.txt`
 
@@ -224,9 +224,12 @@ Outputs:
 
 The packaging job also runs in GitHub Actions via `.github/workflows/package.yml`.
 
-> **Runtime note:** the verified local build uses Python 3.10.11. The planned Python 3.12
-> upgrade and the remaining `pip-audit` remediation are deferred until the Microsoft C++
-> Build Tools are available for the InsightFace extension build.
+> **Python 3.12 note:** InsightFace 0.7.3 publishes no cp312 wheel. The repository vendors
+> a locally built Windows wheel in `wheelhouse/` (MinGW-w64, runtime DLLs bundled), so the
+> application and packaging builds do not require a compiler. See
+> [`wheelhouse/README.md`](wheelhouse/README.md) for provenance and rebuild steps.
+>
+> The Python 3.12 lockfile passes `pip-audit -r requirements.lock`.
 
 ## Project Files
 
@@ -238,6 +241,7 @@ The packaging job also runs in GitHub Actions via `.github/workflows/package.yml
 | `requirements.txt` | Pinned production dependencies |
 | `requirements-dev.txt` | Development/test dependencies |
 | `requirements-build.txt` | Packaging dependencies (PyInstaller) |
+| `wheelhouse/` | Vendored cp312 InsightFace wheel and provenance |
 | `packaging/` | PyInstaller spec, icon, version info, Inno Setup script |
 | `scripts/` | Build, installer, and model-prefetch scripts |
 | `.gitignore` | Excludes venv, config, caches, logs |
@@ -247,7 +251,7 @@ The packaging job also runs in GitHub Actions via `.github/workflows/package.yml
 
 | Component | Technology |
 |---|---|
-| **Language** | Python 3.9+ |
+| **Language** | Python 3.12 |
 | **Face Analysis** | InsightFace |
 | **GPU Runtime** | ONNX Runtime (CUDA) |
 | **GUI** | PySide6 6 + QML (v6), Tkinter + ttk (legacy) |

@@ -16,9 +16,10 @@ import math
 import shutil
 import sqlite3
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, cast
+from typing import cast
 
 import numpy as np
 from numpy.typing import NDArray

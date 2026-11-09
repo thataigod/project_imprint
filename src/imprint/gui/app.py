@@ -418,7 +418,7 @@ class Application(tk.Tk):
         """
         state = "disabled" if running else "normal"
         for widget in self._input_widgets:
-            widget.config(state=state)  # type: ignore[attr-defined]  # Tkinter widgets lack .config() on base Widget type
+            widget.config(state=state)  # type: ignore[attr-defined, call-arg]  # Tkinter widgets lack .config() on base Widget type
 
         if running:
             self._run_button.config(

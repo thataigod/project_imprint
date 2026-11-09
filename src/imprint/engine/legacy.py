@@ -18,8 +18,9 @@ import logging
 import math
 import shutil
 import threading
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 import cv2
 import numpy as np

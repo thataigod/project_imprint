@@ -12,16 +12,17 @@
 :: ============================================================================
 @echo off
 setlocal enabledelayedexpansion
+cd /d "%~dp0"
 
 :: ============================================================================
 ::                          CONFIGURATION
 :: ============================================================================
-set "VENV_NAME=imprint_env"
+set "VENV_NAME=.venv"
 set "REQUIREMENTS_FILE=requirements.txt"
 set "INSTALL_RECEIPT=_install.log"
 set "ENTRY_POINT=run.py"
 set "MIN_PYTHON_MAJOR=3"
-set "MIN_PYTHON_MINOR=9"
+set "MIN_PYTHON_MINOR=12"
 
 :: ============================================================================
 ::                     PRE-FLIGHT CHECKS
@@ -52,6 +53,33 @@ if not exist "%ENTRY_POINT%" (
 )
 
 :: ============================================================================
+::                        UV FAST PATH (PREFERRED)
+:: ============================================================================
+
+where uv >nul 2>&1
+if %errorlevel% equ 0 (
+    echo  [1/2] Preparing Python 3.12 environment with uv...
+    uv venv "%VENV_NAME%" --python 3.12
+    if !errorlevel! neq 0 (
+        echo  [ERROR] uv could not create the Python 3.12 environment.
+        echo.
+        pause
+        goto :end
+    )
+
+    echo  [2/2] Installing dependencies with uv...
+    uv pip install --python "%VENV_NAME%\Scripts\python.exe" -r "%REQUIREMENTS_FILE%"
+    if !errorlevel! neq 0 (
+        echo  [ERROR] uv could not install dependencies.
+        echo.
+        pause
+        goto :end
+    )
+
+    goto :launch_app
+)
+
+:: ============================================================================
 ::                  CHECK FOR EXISTING UP-TO-DATE ENV
 :: ============================================================================
 
@@ -74,20 +102,18 @@ if exist "%INSTALL_RECEIPT%" (
 
 echo.
 echo  [1/3] Checking Python installation...
-py -3.10 --version >nul 2>&1
-if %errorlevel% equ 0 (
-    set "PYTHON_EXE=py -3.10"
-) else (
-    set "PYTHON_EXE=python"
-)
-
-%PYTHON_EXE% --version >nul 2>&1
+set "PYTHON_EXE=py -3.12"
+%PYTHON_EXE% -c "import sys; sys.exit(0 if sys.version_info[:2]==(3,12) else 1)" >nul 2>&1
 if %errorlevel% neq 0 (
-    echo  [ERROR] Python is not installed or not in your system PATH.
-    echo          Install Python %MIN_PYTHON_MAJOR%.%MIN_PYTHON_MINOR%+ from https://python.org
-    echo.
-    pause
-    goto :end
+    set "PYTHON_EXE=python"
+    %PYTHON_EXE% -c "import sys; sys.exit(0 if sys.version_info[:2]==(3,12) else 1)" >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo  [ERROR] Python %MIN_PYTHON_MAJOR%.%MIN_PYTHON_MINOR% is required.
+        echo          Install Python %MIN_PYTHON_MAJOR%.%MIN_PYTHON_MINOR% from https://python.org
+        echo.
+        pause
+        goto :end
+    )
 )
 
 :: Verify minimum version

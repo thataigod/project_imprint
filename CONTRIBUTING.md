@@ -6,19 +6,22 @@ Thank you for contributing to **Project Imprint**! To maintain code quality, typ
 
 ## 1. Development Environment Setup
 
-This project is built using Python 3.10. Ensure you have the recommended environment setup:
+This project is built using Python 3.12. Ensure you have the recommended environment setup:
 
 1. **Create the virtual environment**:
    ```bash
-   python -m venv imprint_env
+   uv venv .venv --python 3.12
    ```
 2. **Activate the environment**:
-   * **Windows**: `imprint_env\Scripts\activate.bat` (cmd) or `.\imprint_env\Scripts\Activate.ps1` (PowerShell)
-   * **Linux/macOS**: `source imprint_env/bin/activate`
+   * **Windows**: `.venv\Scripts\activate.bat` (cmd) or `.\.venv\Scripts\Activate.ps1` (PowerShell)
+   * **Linux/macOS**: `source .venv/bin/activate`
 3. **Install dependencies**:
    ```bash
    pip install -r requirements-dev.txt
    ```
+
+   Windows installs use the vendored cp312 InsightFace wheel in `wheelhouse/` through
+   the `--find-links` entry in `requirements.txt`.
 4. **Set up pre-commit hooks**:
    ```bash
    pre-commit install

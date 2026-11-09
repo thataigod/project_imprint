@@ -8,6 +8,7 @@ $root = Split-Path -Parent $PSScriptRoot
 if (-not $Python) {
     $candidates = @(
         (Join-Path $root ".venv312\Scripts\python.exe"),
+        (Join-Path $root ".venv\Scripts\python.exe"),
         (Join-Path $root "imprint_env\Scripts\python.exe")
     )
     foreach ($candidate in $candidates) {

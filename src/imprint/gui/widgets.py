@@ -9,8 +9,8 @@ widget construction.
 from __future__ import annotations
 
 import tkinter as tk
+from collections.abc import Callable
 from tkinter import filedialog, ttk
-from typing import Callable
 
 from imprint.gui.tooltips import ToolTip
 

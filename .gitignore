@@ -35,3 +35,6 @@ htmlcov/
 # Logs
 *.log
 logs/
+
+# Vendored wheel build scratch
+vendor_src/
