@@ -9,6 +9,9 @@ All notable changes to Imprint are documented here.
 - Modern PySide6 6 / QML desktop interface with dark and light themes.
 - Drag-and-drop folder cards, live result grid, filters, activity log, summary
   dashboard, and inline setting help.
+- Full-image result viewer with left/right arrow navigation inside the active
+  result filter.
+- Matches-only result filter is selected by default.
 - Overlapped decoding pipeline with optional SQLite embedding cache.
 - Pause/resume and graceful cancellation across the worker lifecycle.
 - CSV-ready run summaries and streaming per-image results.
@@ -24,6 +27,7 @@ All notable changes to Imprint are documented here.
 - Configuration and logs now live in per-user AppData locations.
 - QML resources and Windows version metadata are bundled into the application.
 - ONNX Runtime pinned to CUDA 12 / cuDNN 9 compatible releases.
+- Source image totals now display correctly while an analysis is running.
 - Lockfile updated; `pip-audit` reports no known vulnerabilities.
 - Bundle pruned by removing unused Qt Quick styles and packages.
 

@@ -8,8 +8,7 @@ $root = Split-Path -Parent $PSScriptRoot
 if (-not $Python) {
     $candidates = @(
         (Join-Path $root ".venv312\Scripts\python.exe"),
-        (Join-Path $root ".venv\Scripts\python.exe"),
-        (Join-Path $root "imprint_env\Scripts\python.exe")
+        (Join-Path $root ".venv\Scripts\python.exe")
     )
     foreach ($candidate in $candidates) {
         if (-not (Test-Path -LiteralPath $candidate)) {
@@ -24,7 +23,7 @@ if (-not $Python) {
 }
 
 if (-not $Python) {
-    throw "No Python environment found. Create imprint_env or pass -Python <path>."
+    throw "No Python 3.12 environment found. Create .venv312 or pass -Python <path>."
 }
 
 if (Test-Path -LiteralPath $Python) {

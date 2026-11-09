@@ -18,6 +18,37 @@ ApplicationWindow {
     font.family: Theme.fontFamily
 
     property bool logExpanded: true
+    property bool viewerOpen: false
+    property int viewerIndex: -1
+    property var viewerData: ({})
+
+    function openViewer(index) {
+        viewerIndex = index;
+        viewerData = bridge.resultAt(index);
+        viewerOpen = true;
+        viewerScope.forceActiveFocus();
+    }
+
+    function closeViewer() {
+        viewerOpen = false;
+    }
+
+    function stepViewer(delta) {
+        var count = bridge.visibleResultCount;
+        if (!viewerOpen || count <= 0) {
+            return;
+        }
+        var next = Math.max(0, Math.min(count - 1, viewerIndex + delta));
+        if (next !== viewerIndex) {
+            viewerIndex = next;
+            viewerData = bridge.resultAt(next);
+        }
+    }
+
+    function setResultFilter(value) {
+        viewerOpen = false;
+        bridge.resultFilter = value;
+    }
 
     Shortcut {
         sequence: "Ctrl+R"
@@ -29,7 +60,13 @@ ApplicationWindow {
     }
     Shortcut {
         sequence: "Escape"
-        onActivated: bridge.cancelAnalysis()
+        onActivated: {
+            if (window.viewerOpen) {
+                window.closeViewer();
+            } else {
+                bridge.cancelAnalysis();
+            }
+        }
     }
     Shortcut {
         sequence: "Ctrl+L"
@@ -344,6 +381,7 @@ ApplicationWindow {
                                 }
 
                                 AppButton {
+                                    Layout.fillWidth: true
                                     text: "Reset recommended"
                                     variant: "ghost"
                                     implicitHeight: 30
@@ -475,7 +513,7 @@ ApplicationWindow {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 96
+                    Layout.preferredHeight: 124
                     color: Theme.background
 
                     ColumnLayout {
@@ -591,6 +629,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.leftMargin: 22
                     Layout.rightMargin: 22
+                    Layout.topMargin: 4
                     Layout.bottomMargin: 10
                     spacing: 8
 
@@ -608,7 +647,7 @@ ApplicationWindow {
                         implicitHeight: 30
                         implicitWidth: 62
                         font.pixelSize: 11
-                        onClicked: bridge.resultFilter = "all"
+                        onClicked: window.setResultFilter("all")
                     }
 
                     AppButton {
@@ -618,7 +657,7 @@ ApplicationWindow {
                         implicitHeight: 30
                         implicitWidth: 82
                         font.pixelSize: 11
-                        onClicked: bridge.resultFilter = "match"
+                        onClicked: window.setResultFilter("match")
                     }
 
                     AppButton {
@@ -628,7 +667,7 @@ ApplicationWindow {
                         implicitHeight: 30
                         implicitWidth: 82
                         font.pixelSize: 11
-                        onClicked: bridge.resultFilter = "skip"
+                        onClicked: window.setResultFilter("skip")
                     }
 
                     AppButton {
@@ -638,7 +677,7 @@ ApplicationWindow {
                         implicitHeight: 30
                         implicitWidth: 72
                         font.pixelSize: 11
-                        onClicked: bridge.resultFilter = "error"
+                        onClicked: window.setResultFilter("error")
                     }
 
                     Item { Layout.fillWidth: true }
@@ -677,6 +716,7 @@ ApplicationWindow {
                             subfolder: model.subfolder
                             cached: model.cached
                             errorText: model.errorText
+                            onClicked: window.openViewer(index)
                         }
                     }
 
@@ -697,7 +737,7 @@ ApplicationWindow {
                         Text {
                             text: bridge.running
                                   ? "Matched images will stream into this grid."
-                                  : bridge.resultFilter !== "all"
+                                  : (bridge.matchCount + bridge.skipCount + bridge.errorCount > 0)
                                     ? "No images match this filter."
                                     : "Choose folders, then run an analysis."
                             color: Theme.textFaint
@@ -824,6 +864,139 @@ ApplicationWindow {
                     font.pixelSize: 10
                     elide: Text.ElideRight
                     Layout.maximumWidth: 600
+                }
+            }
+        }
+    }
+
+    FocusScope {
+        id: viewerScope
+        anchors.fill: parent
+        visible: viewerOpen
+        focus: viewerOpen
+        z: 100
+
+        Keys.onEscapePressed: window.closeViewer()
+        Keys.onLeftPressed: window.stepViewer(-1)
+        Keys.onRightPressed: window.stepViewer(1)
+
+        Rectangle {
+            anchors.fill: parent
+            color: "#B3000000"
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: window.closeViewer()
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: Math.min(parent.width - 100, 1100)
+            height: Math.min(parent.height - 100, 760)
+            radius: Theme.radiusLarge
+            color: Theme.surface
+            border.width: 1
+            border.color: Theme.border
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 16
+                spacing: 10
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 12
+
+                    Text {
+                        text: viewerData.fileName || ""
+                        color: Theme.text
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 15
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideMiddle
+                        Layout.fillWidth: true
+                    }
+
+                    Text {
+                        text: viewerData.status === "match" && viewerData.score >= 0
+                              ? viewerData.score.toFixed(3)
+                              : (viewerData.status || "").toUpperCase()
+                        color: viewerData.status === "match"
+                               ? Theme.success
+                               : viewerData.status === "error"
+                                 ? Theme.danger
+                                 : Theme.textMuted
+                        font.family: Theme.monoFamily
+                        font.pixelSize: 13
+                        font.weight: Font.DemiBold
+                    }
+
+                    AppButton {
+                        text: "Close"
+                        variant: "ghost"
+                        implicitHeight: 32
+                        implicitWidth: 70
+                        font.pixelSize: 12
+                        onClicked: window.closeViewer()
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    radius: Theme.radius
+                    color: Theme.background
+
+                    Image {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        source: viewerData.sourceUrl || ""
+                        asynchronous: true
+                        cache: false
+                        fillMode: Image.PreserveAspectFit
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    Text {
+                        text: viewerData.subfolder || viewerData.errorText || ""
+                        color: viewerData.errorText ? Theme.danger : Theme.textMuted
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+
+                    Text {
+                        text: (viewerIndex + 1) + " / " + bridge.visibleResultCount
+                        color: Theme.textFaint
+                        font.family: Theme.monoFamily
+                        font.pixelSize: 11
+                    }
+
+                    AppButton {
+                        text: "Previous"
+                        variant: "secondary"
+                        implicitHeight: 32
+                        implicitWidth: 92
+                        font.pixelSize: 12
+                        enabled: viewerIndex > 0
+                        onClicked: window.stepViewer(-1)
+                    }
+
+                    AppButton {
+                        text: "Next"
+                        variant: "secondary"
+                        implicitHeight: 32
+                        implicitWidth: 76
+                        font.pixelSize: 12
+                        enabled: viewerIndex < bridge.visibleResultCount - 1
+                        onClicked: window.stepViewer(1)
+                    }
                 }
             }
         }

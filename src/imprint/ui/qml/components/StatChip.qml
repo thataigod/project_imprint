@@ -8,7 +8,7 @@ Rectangle {
     property color accentColor: Theme.accent
 
     implicitWidth: 108
-    implicitHeight: 54
+    implicitHeight: 58
     radius: 10
     color: Theme.surfaceAlt
     border.width: 1

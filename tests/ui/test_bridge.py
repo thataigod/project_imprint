@@ -18,6 +18,7 @@ from imprint.events.pipeline import (
     ImageProcessed,
     Progress,
     RunStarted,
+    SourceDiscovered,
     Stage,
     StageChanged,
     SummaryEvent,
@@ -359,6 +360,9 @@ class TestEventsAndLogs:
         bridge._on_pipeline_event(StageChanged(Stage.PROCESSING, "Processing images..."))
         assert bridge.statusText == "Processing images..."
 
+        bridge._on_pipeline_event(SourceDiscovered(12))
+        assert bridge.totalCount == 12
+
         bridge._on_pipeline_event(Progress(5, 10, "Halfway"))
         assert bridge.progressValue == 0.5
         assert bridge.progressText == "5 / 10"
@@ -383,6 +387,12 @@ class TestEventsAndLogs:
         assert bridge.skipCount == 1
         assert bridge.errorCount == 1
         assert bridge.processedCount == 3
+        assert bridge.resultFilter == "match"
+        assert bridge.visibleResultCount == 1
+        assert bridge.resultAt(0)["fileName"] == "match.png"
+        assert bridge.resultAt(99) == {}
+        bridge.resultFilter = "all"
+        assert bridge.visibleResultCount == 3
         assert bridge.resultsProxy.rowCount() == 3
 
         summary = RunSummary(3, 3, 1, 1, 1, False)

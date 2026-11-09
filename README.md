@@ -10,7 +10,7 @@ A high-performance, GPU-accelerated desktop application for sorting images based
 
 - **State-of-the-Art Recognition** — Choose from multiple InsightFace models: *Antelope v2* (maximum accuracy), *Buffalo L* (balanced), or *Buffalo S* (fastest).
 - **Automated Reference Pruning** — Provide multiple reference photos and the app intelligently finds the most consistent "core" group using a medoid-based algorithm, discarding outliers like blurry shots or side profiles.
-- **Modern Desktop UI** — A themed PySide6/QML interface with drag-and-drop folder cards, model selection, live result thumbnails, filters, progress, and an activity log.
+- **Modern Desktop UI** — A themed PySide6/QML interface with drag-and-drop folder cards, model selection, live result thumbnails, filters, progress, and an activity log. Matches are shown by default; click any result to open the full-image viewer and use the left/right arrow keys to move through the active filter.
 - **Dynamic Subfolder Organisation** — Matched images are automatically sorted into tiered subdirectories by similarity score (e.g. `Score_0.250_to_0.300/`).
 - **Thread-Safe Architecture** — All GPU work runs on a background thread with a typed event system, ensuring the UI stays responsive and crash-free.
 - **Persistent Configuration** — Folder paths and settings are saved to `config.ini` and restored on next launch.
@@ -50,7 +50,6 @@ project_imprint/
 │   └── imprint/
 │       ├── __init__.py
 │       ├── __main__.py
-│       ├── app.py
 │       ├── domain/       # constants, settings, math
 │       ├── engine/       # v6 pipeline and parity fixture
 │       ├── events/       # typed engine events
@@ -85,6 +84,8 @@ Subsequent launches skip straight to the v6 QML application.
 3. **Run Analysis**
    - Click **"Run analysis"**. Monitor the progress bar and live log.
    - Click **"Cancel"** to stop early — partial results are preserved.
+   - Click any result card to open the full-image viewer. The left/right arrow keys
+     navigate within the currently selected filter (Matches by default).
 
 ## Configuration (`config.ini`)
 
@@ -136,7 +137,6 @@ The application is split into focused, testable modules:
 src/imprint/
 ├── __init__.py          # Package metadata and version
 ├── __main__.py          # python -m imprint entry point
-├── app.py               # v6 composition root (placeholder)
 ├── domain/
 │   ├── constants.py     # Named constants, model registry
 │   ├── settings.py      # Typed settings + validation

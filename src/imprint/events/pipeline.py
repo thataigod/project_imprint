@@ -41,6 +41,13 @@ class StageChanged:
 
 
 @dataclass(frozen=True)
+class SourceDiscovered:
+    """Emitted after the source folder scan with the total image count."""
+
+    total: int
+
+
+@dataclass(frozen=True)
 class Progress:
     """Progress for the current stage."""
 
@@ -85,7 +92,14 @@ class Finished:
 
 
 PipelineEvent = (
-    RunStarted | StageChanged | Progress | ImageProcessed | SummaryEvent | Halted | Finished
+    RunStarted
+    | StageChanged
+    | SourceDiscovered
+    | Progress
+    | ImageProcessed
+    | SummaryEvent
+    | Halted
+    | Finished
 )
 
 __all__ = [
@@ -95,6 +109,7 @@ __all__ = [
     "PipelineEvent",
     "Progress",
     "RunStarted",
+    "SourceDiscovered",
     "Stage",
     "StageChanged",
     "SummaryEvent",

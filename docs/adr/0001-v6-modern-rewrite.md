@@ -76,7 +76,6 @@ src/imprint/
 ├── events/      # typed engine events
 ├── platform/    # config persistence, logging, model prefetch
 ├── ui/          # QML views, view models, Qt bridge
-└── app.py       # composition root
 tests/
 ├── unit/        # pure logic, 100% coverage
 ├── parity/      # legacy versus new engine comparison

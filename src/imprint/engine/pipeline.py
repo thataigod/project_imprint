@@ -44,6 +44,7 @@ from imprint.events.pipeline import (
     PipelineEvent,
     Progress,
     RunStarted,
+    SourceDiscovered,
     Stage,
     StageChanged,
     SummaryEvent,
@@ -151,6 +152,7 @@ class EngineV6:
             if self._cancel.is_set():
                 return None
 
+            self._emit(SourceDiscovered(len(source_images)))
             self._emit(
                 StageChanged(
                     Stage.PROCESSING,

@@ -12,7 +12,13 @@ Card {
     property bool cached: false
     property string errorText: ""
 
+    signal clicked()
+
     implicitHeight: 200
+
+    TapHandler {
+        onTapped: root.clicked()
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -29,7 +35,7 @@ Card {
                 source: root.sourceUrl
                 asynchronous: true
                 cache: false
-                fillMode: Image.PreserveAspectCrop
+                fillMode: Image.PreserveAspectFit
             }
 
             Rectangle {

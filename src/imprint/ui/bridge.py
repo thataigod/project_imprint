@@ -50,6 +50,7 @@ from imprint.events.pipeline import (
     PipelineEvent,
     Progress,
     RunStarted,
+    SourceDiscovered,
     StageChanged,
     SummaryEvent,
 )
@@ -337,6 +338,7 @@ class AppBridge(QObject):
 
         self._results = ResultsModel(self)
         self._results_proxy = ResultFilterModel(self._results, self)
+        self._results_proxy.set_filter("match")
         self._log = LogModel(parent=self)
         self._log_queue: queue.Queue[str] = queue.Queue()
         configure_logging(self._log_queue, log_dir=log_dir)
@@ -360,7 +362,7 @@ class AppBridge(QObject):
         self._processed_count = 0
         self._total_count = 0
         self._summary_text = ""
-        self._result_filter = "all"
+        self._result_filter = "match"
 
         self._model_names = [profile.display_name for profile in MODEL_REGISTRY.values()]
         self._model_index = next(
@@ -610,6 +612,7 @@ class AppBridge(QObject):
         self._result_filter = value
         self._results_proxy.set_filter(value)
         self.resultFilterChanged.emit()
+        self.countsChanged.emit()
 
     resultFilter = Property(
         str,
@@ -622,6 +625,28 @@ class AppBridge(QObject):
     def resultsProxy(self) -> ResultFilterModel:
         """Filtered model consumed by the QML grid."""
         return self._results_proxy
+
+    def _get_visible_result_count(self) -> int:
+        return int(self._results_proxy.rowCount())
+
+    visibleResultCount = Property(int, _get_visible_result_count, notify=countsChanged)
+
+    @Slot(int, result="QVariantMap")
+    def resultAt(self, index: int) -> dict[str, Any]:
+        """Return one filtered result row as a QML-friendly mapping."""
+        if index < 0 or index >= self._results_proxy.rowCount():
+            return {}
+        model_index = self._results_proxy.index(index, 0)
+        return {
+            "fileName": self._results_proxy.data(model_index, ResultsModel.FileNameRole),
+            "sourceUrl": self._results_proxy.data(model_index, ResultsModel.SourceUrlRole),
+            "score": self._results_proxy.data(model_index, ResultsModel.ScoreRole),
+            "detScore": self._results_proxy.data(model_index, ResultsModel.DetScoreRole),
+            "status": self._results_proxy.data(model_index, ResultsModel.StatusRole),
+            "subfolder": self._results_proxy.data(model_index, ResultsModel.SubfolderRole),
+            "cached": self._results_proxy.data(model_index, ResultsModel.CachedRole),
+            "errorText": self._results_proxy.data(model_index, ResultsModel.ErrorRole),
+        }
 
     @Property(QObject, constant=True)
     def logModel(self) -> LogModel:
@@ -677,6 +702,7 @@ class AppBridge(QObject):
             return
 
         self._results.clear()
+        self._set_result_filter("match")
         self._log.clear()
         self._summary_text = ""
         self._match_count = 0
@@ -810,6 +836,9 @@ class AppBridge(QObject):
             self._set_status(f"Preparing '{event.model_name}' model...")
         elif isinstance(event, StageChanged):
             self._set_status(event.message)
+        elif isinstance(event, SourceDiscovered):
+            self._total_count = event.total
+            self.countsChanged.emit()
         elif isinstance(event, Progress):
             self._set_progress(event.current, event.total, event.message)
         elif isinstance(event, ImageProcessed):
