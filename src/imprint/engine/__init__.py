@@ -1,9 +1,28 @@
 """Face-sorting engine package.
 
-The v5 implementation is retained as :mod:`imprint.engine.legacy` until
-the v6 pipeline reaches parity.
+``EngineV6`` is the new pipeline.  ``SorterEngine`` remains an alias for
+the v5 implementation until the QML front end reaches parity.
 """
 
-from imprint.engine.legacy import EventCallback, FaceAnalyser, FaceResult, SorterEngine
+from imprint.domain.results import ImageStatus, MatchRecord, RunSummary
+from imprint.engine.legacy import (
+    EventCallback,
+    FaceAnalyser,
+    FaceResult,
+    SorterEngine,
+)
+from imprint.engine.legacy import SorterEngine as LegacySorterEngine
+from imprint.engine.pipeline import EngineOptions, EngineV6
 
-__all__ = ["EventCallback", "FaceAnalyser", "FaceResult", "SorterEngine"]
+__all__ = [
+    "EngineOptions",
+    "EngineV6",
+    "EventCallback",
+    "FaceAnalyser",
+    "FaceResult",
+    "ImageStatus",
+    "LegacySorterEngine",
+    "MatchRecord",
+    "RunSummary",
+    "SorterEngine",
+]
