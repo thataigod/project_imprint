@@ -2,21 +2,16 @@
 
 A high-performance, GPU-accelerated desktop application for sorting images based on facial similarity. Powered by state-of-the-art face recognition models, Imprint automatically identifies faces in your photos and organises them into scored subdirectories with a single click.
 
-> **v6 modernization in progress** — this branch moves the package to a `src/` layout and adds the PySide6/QML interface. The Tkinter application remains fully functional during the transition. See [`docs/adr/0001-v6-modern-rewrite.md`](docs/adr/0001-v6-modern-rewrite.md).
+> **v6 modernization** — the PySide6/QML interface is now the default. See [`docs/adr/0001-v6-modern-rewrite.md`](docs/adr/0001-v6-modern-rewrite.md).
 >
-> **Preview the QML interface** from an activated environment with:
->
-> ```bash
-> python run.py --qml
-> ```
->
-> `start.bat` still launches the legacy Tkinter interface until the Phase 4 cutover.
+> Launch with `start.bat` or `python run.py`. The legacy Tkinter interface remains available
+> during the transition with `start.bat --legacy` or `python run.py --legacy`.
 
 ## Features
 
 - **State-of-the-Art Recognition** — Choose from multiple InsightFace models: *Antelope v2* (maximum accuracy), *Buffalo L* (balanced), or *Buffalo S* (fastest).
 - **Automated Reference Pruning** — Provide multiple reference photos and the app intelligently finds the most consistent "core" group using a medoid-based algorithm, discarding outliers like blurry shots or side profiles.
-- **User-Friendly GUI** — A clean Tkinter interface with model selection, real-time progress, a dark-themed live log, and inline tooltips on every setting.
+- **Modern Desktop UI** — A themed PySide6/QML interface with drag-and-drop folder cards, model selection, live result thumbnails, filters, progress, and an activity log. The legacy Tkinter interface remains available with `--legacy`.
 - **Dynamic Subfolder Organisation** — Matched images are automatically sorted into tiered subdirectories by similarity score (e.g. `Score_0.250_to_0.300/`).
 - **Thread-Safe Architecture** — All GPU work runs on a background thread with a typed event system, ensuring the UI stays responsive and crash-free.
 - **Persistent Configuration** — Folder paths and settings are saved to `config.ini` and restored on next launch.
@@ -73,7 +68,8 @@ Double-click **`start.bat`**. On first run it will:
 2. Create a virtual environment (`imprint_env/`)
 3. Install all dependencies from `requirements.txt`
 
-Subsequent launches skip straight to the application.
+Subsequent launches skip straight to the v6 QML application. Launch the legacy Tkinter
+interface with `start.bat --legacy` or `python run.py --legacy`.
 
 ## Usage
 
@@ -85,7 +81,7 @@ Subsequent launches skip straight to the application.
 2. **Configure Settings**
    - Select a **Recognition Model** — this auto-populates recommended threshold and batch size.
    - Adjust **Distance Threshold** (lower = stricter), **Face Confidence** (0.0–1.0), **Batch Size**, and **Number of Subfolders** as needed.
-   - Hover over any setting for a tooltip explanation.
+   - Each setting includes inline help; the legacy interface uses hover tooltips.
 
 3. **Run Analysis**
    - Click **"Save Config & Run Analysis"**. Monitor the progress bar and live log.
@@ -204,7 +200,7 @@ ruff check src/imprint/ tests/
 
 | File | Purpose |
 |---|---|
-| `run.py` | Convenience entry point for `start.bat` |
+| `run.py` | Entry point for `start.bat`; QML by default, `--legacy` for Tkinter |
 | `start.bat` | Smart Windows launcher with auto-setup |
 | `pyproject.toml` | Modern Python packaging metadata |
 | `requirements.txt` | Pinned production dependencies |

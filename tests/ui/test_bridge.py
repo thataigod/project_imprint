@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QSettings, QUrl
 
 from imprint.domain.results import ImageStatus, RunSummary
 from imprint.domain.settings import AnalysisSettings, PathSettings
@@ -175,6 +175,40 @@ class TestFoldersAndSettings:
         assert bridge.resultFilter == "match"
         bridge.resultFilter = "all"
         assert bridge.resultFilter == "all"
+
+    def test_loads_existing_v5_config(self, tmp_path: Path, qapp) -> None:
+        config_path = tmp_path / "config.ini"
+        config_path.write_text(
+            "[Paths]\n"
+            "reference_folder = C:/ref\n"
+            "source_folder = C:/src\n"
+            "destination_folder = C:/dst\n"
+            "[Settings]\n"
+            "model_name = buffalo_l\n"
+            "distance_threshold = 0.33\n"
+            "confidence_threshold = 0.91\n"
+            "batch_size = 7\n"
+            "number_of_subfolders = 4\n",
+            encoding="utf-8",
+        )
+        settings = QSettings(str(tmp_path / "ui.ini"), QSettings.Format.IniFormat)
+        loaded = AppBridge(
+            config_path=config_path,
+            log_dir=tmp_path,
+            qsettings=settings,
+        )
+        try:
+            assert loaded.referenceFolder == "C:/ref"
+            assert loaded.sourceFolder == "C:/src"
+            assert loaded.destinationFolder == "C:/dst"
+            assert loaded.modelIndex == 1
+            assert loaded.distanceThreshold == 0.33
+            assert loaded.confidenceThreshold == 0.91
+            assert loaded.batchSize == 7
+            assert loaded.numberOfSubfolders == 4
+            assert loaded.cacheEnabled is True
+        finally:
+            loaded.shutdown()
 
     def test_geometry_and_version(self, bridge: AppBridge, tmp_path: Path) -> None:
         assert bridge.version

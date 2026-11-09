@@ -1,4 +1,4 @@
-:: start.bat — Imprint Face Sorter Intelligent Launcher (v5)
+:: start.bat — Imprint Face Sorter Intelligent Launcher (v6)
 ::
 :: This script handles:
 ::   1. Python presence check
@@ -7,6 +7,8 @@
 ::   4. Application launch
 ::
 :: Usage: Double-click this file or run from a terminal.
+::        start.bat             -> v6 QML interface
+::        start.bat --legacy    -> legacy Tkinter interface
 :: ============================================================================
 @echo off
 setlocal enabledelayedexpansion
@@ -27,7 +29,7 @@ set "MIN_PYTHON_MINOR=9"
 
 echo.
 echo  ============================================================
-echo   Imprint Face Sorter — Launcher v5
+echo   Imprint Face Sorter — Launcher v6
 echo  ============================================================
 echo.
 
@@ -136,10 +138,10 @@ echo.
 
 :launch_app
 echo.
-echo  Launching Imprint Face Sorter...
+echo  Launching Imprint...
 echo.
 call "%VENV_NAME%\Scripts\activate.bat"
-python "%ENTRY_POINT%"
+python "%ENTRY_POINT%" %*
 echo.
 echo  Application closed.
 

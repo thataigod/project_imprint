@@ -105,8 +105,10 @@ QML interface reaches feature parity.
 - **Phase 3** complete: PySide6/QML interface, Qt bridge, live results grid, settings,
   drag-and-drop folder cards, activity log, summary, themes, and worker lifecycle.
   The QML interface is previewable with `python run.py --qml`.
-- **Phase 4** next: make the QML interface the default entry point and retire the
-  legacy Tkinter path after final parity verification.
+- **Phase 4** complete: the QML interface is the default entry point; `--legacy`
+  retains the Tkinter interface during the transition. Existing `config.ini`
+  files are loaded directly by the Qt bridge. Legacy removal is deferred until
+  the final release.
 
 ## Verification
 
