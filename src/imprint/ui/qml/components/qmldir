@@ -1,0 +1,11 @@
+singleton Theme 1.0 Theme.qml
+AppButton 1.0 AppButton.qml
+AppComboBox 1.0 AppComboBox.qml
+AppProgressBar 1.0 AppProgressBar.qml
+Card 1.0 Card.qml
+DropFolderCard 1.0 DropFolderCard.qml
+ResultCard 1.0 ResultCard.qml
+SettingSlider 1.0 SettingSlider.qml
+SettingSwitch 1.0 SettingSwitch.qml
+StatChip 1.0 StatChip.qml
+Stepper 1.0 Stepper.qml

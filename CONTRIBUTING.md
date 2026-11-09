@@ -6,19 +6,22 @@ Thank you for contributing to **Project Imprint**! To maintain code quality, typ
 
 ## 1. Development Environment Setup
 
-This project is built using Python 3.10. Ensure you have the recommended environment setup:
+This project is built using Python 3.12. Ensure you have the recommended environment setup:
 
 1. **Create the virtual environment**:
    ```bash
-   python -m venv imprint_env
+   uv venv .venv --python 3.12
    ```
 2. **Activate the environment**:
-   * **Windows**: `imprint_env\Scripts\activate.bat` (cmd) or `.\imprint_env\Scripts\Activate.ps1` (PowerShell)
-   * **Linux/macOS**: `source imprint_env/bin/activate`
+   * **Windows**: `.venv\Scripts\activate.bat` (cmd) or `.\.venv\Scripts\Activate.ps1` (PowerShell)
+   * **Linux/macOS**: `source .venv/bin/activate`
 3. **Install dependencies**:
    ```bash
    pip install -r requirements-dev.txt
    ```
+
+   Windows installs use the vendored cp312 InsightFace wheel in `wheelhouse/` through
+   the `--find-links` entry in `requirements.txt`.
 4. **Set up pre-commit hooks**:
    ```bash
    pre-commit install
@@ -31,12 +34,12 @@ This project is built using Python 3.10. Ensure you have the recommended environ
 We enforce strict linting, formatting, and static typing:
 * **Linting & Formatting**: We use `ruff`. Run it locally via:
   ```bash
-  ruff check imprint/ tests/
-  ruff format imprint/ tests/
+  ruff check src/imprint/ tests/
+  ruff format src/imprint/ tests/
   ```
 * **Static Typing**: We use `mypy` with strict configuration parameters. Run it locally via:
   ```bash
-  mypy imprint/
+  mypy src/imprint/
   ```
 
 Pre-commit hooks will automatically run `ruff` and `mypy` on files modified during commit.
@@ -56,16 +59,11 @@ We enforce a **100% test coverage target** in the CI pipeline.
   pytest tests/ --cov=imprint --cov-fail-under=100
   ```
 
-### Platform-Specific Testing Rules
+### Headless Qt Tests
 
-> [!IMPORTANT]
-> **Windows stdout/stderr Capture Bug**:
-> Standard pytest runs capture standard streams, which can corrupt file descriptor references in Windows Tkinter/Tcl handles during repeated setup/teardowns, leading to initialization crashes.
-> 
-> When running pytest locally on Windows, you **MUST** pass the `-s` flag to disable stdout/stderr capture:
-> ```bash
-> pytest tests/ --cov=imprint --cov-fail-under=100 -s
-> ```
+Qt tests automatically set `QT_QPA_PLATFORM=offscreen` in `tests/ui/conftest.py`, so no
+display server is required. The `-s` flag remains useful for verbose local output but is
+not required.
 
 ---
 

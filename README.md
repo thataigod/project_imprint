@@ -2,11 +2,15 @@
 
 A high-performance, GPU-accelerated desktop application for sorting images based on facial similarity. Powered by state-of-the-art face recognition models, Imprint automatically identifies faces in your photos and organises them into scored subdirectories with a single click.
 
+> **Imprint v6** — the PySide6/QML interface is now the default. See [`docs/adr/0001-v6-modern-rewrite.md`](docs/adr/0001-v6-modern-rewrite.md).
+>
+> Launch with `start.bat` or `python run.py`.
+
 ## Features
 
 - **State-of-the-Art Recognition** — Choose from multiple InsightFace models: *Antelope v2* (maximum accuracy), *Buffalo L* (balanced), or *Buffalo S* (fastest).
 - **Automated Reference Pruning** — Provide multiple reference photos and the app intelligently finds the most consistent "core" group using a medoid-based algorithm, discarding outliers like blurry shots or side profiles.
-- **User-Friendly GUI** — A clean Tkinter interface with model selection, real-time progress, a dark-themed live log, and inline tooltips on every setting.
+- **Modern Desktop UI** — A themed PySide6/QML interface with drag-and-drop folder cards, model selection, live result thumbnails, filters, progress, and an activity log. Matches are shown by default; click any result to open the full-image viewer and use the left/right arrow keys to move through the active filter.
 - **Dynamic Subfolder Organisation** — Matched images are automatically sorted into tiered subdirectories by similarity score (e.g. `Score_0.250_to_0.300/`).
 - **Thread-Safe Architecture** — All GPU work runs on a background thread with a typed event system, ensuring the UI stays responsive and crash-free.
 - **Persistent Configuration** — Folder paths and settings are saved to `config.ini` and restored on next launch.
@@ -19,17 +23,19 @@ A high-performance, GPU-accelerated desktop application for sorting images based
 |---|---|
 | **OS** | Windows 10 / 11 |
 | **GPU** | NVIDIA with CUDA support |
-| **Python** | 3.9 or later, added to PATH |
-| **CUDA Toolkit** | Version 11.x (11.8 recommended) |
-| **cuDNN** | v8.9.x for CUDA 11.x |
+| **Python** | 3.12, added to PATH |
+| **CUDA Toolkit** | Version 12.x (12.8 recommended) |
+| **cuDNN** | 9.x for CUDA 12.x |
 
 ## Setup & Installation
 
 ### 1. Install CUDA and cuDNN (one-time)
 
-1. Install the [NVIDIA CUDA Toolkit v11.8](https://developer.nvidia.com/cuda-11-8-0-download-archive) using the "Express" option.
-2. Download [cuDNN v8.9.7 for CUDA 11.x](https://developer.nvidia.com/rdp/cudnn-archive).
-3. Unzip cuDNN and copy the contents of `bin/`, `include/`, and `lib/` into your CUDA installation directory (e.g. `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8`).
+1. Install the [NVIDIA CUDA Toolkit 12.x](https://developer.nvidia.com/cuda-downloads) using the "Express" option.
+2. Download [cuDNN 9.x for CUDA 12.x](https://developer.nvidia.com/cudnn).
+3. Unzip cuDNN and copy the contents of `bin/`, `include/`, and `lib/` into your CUDA installation directory (e.g. `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8`).
+
+The packaged application does not bundle the CUDA or cuDNN runtimes; install them on the target machine.
 
 ### 2. Download the Project
 
@@ -40,32 +46,28 @@ project_imprint/
 ├── start.bat
 ├── run.py
 ├── requirements.txt
-├── imprint/
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── config.py
-│   ├── constants.py
-│   ├── engine.py
-│   ├── events.py
-│   ├── logging_setup.py
-│   ├── math_utils.py
-│   └── gui/
+├── src/
+│   └── imprint/
 │       ├── __init__.py
-│       ├── app.py
-│       ├── tooltips.py
-│       └── widgets.py
+│       ├── __main__.py
+│       ├── domain/       # constants, settings, math
+│       ├── engine/       # v6 pipeline and parity fixture
+│       ├── events/       # typed engine events
+│       ├── platform/     # config persistence, logging
+│       └── ui/           # v6 PySide6/QML interface
 └── tests/
+    ├── unit/
     └── ...
 ```
 
 ### 3. Launch
 
 Double-click **`start.bat`**. On first run it will:
-1. Check for Python ≥ 3.9
-2. Create a virtual environment (`imprint_env/`)
+1. Check for Python 3.12
+2. Create a Python 3.12 virtual environment (`.venv/`, via `uv` when available)
 3. Install all dependencies from `requirements.txt`
 
-Subsequent launches skip straight to the application.
+Subsequent launches skip straight to the v6 QML application.
 
 ## Usage
 
@@ -77,11 +79,13 @@ Subsequent launches skip straight to the application.
 2. **Configure Settings**
    - Select a **Recognition Model** — this auto-populates recommended threshold and batch size.
    - Adjust **Distance Threshold** (lower = stricter), **Face Confidence** (0.0–1.0), **Batch Size**, and **Number of Subfolders** as needed.
-   - Hover over any setting for a tooltip explanation.
+   - Each setting includes inline help.
 
 3. **Run Analysis**
-   - Click **"Save Config & Run Analysis"**. Monitor the progress bar and live log.
+   - Click **"Run analysis"**. Monitor the progress bar and live log.
    - Click **"Cancel"** to stop early — partial results are preserved.
+   - Click any result card to open the full-image viewer. The left/right arrow keys
+     navigate within the currently selected filter (Matches by default).
 
 ## Configuration (`config.ini`)
 
@@ -130,25 +134,35 @@ If the closest distance to any reference is below the threshold, the image is co
 The application is split into focused, testable modules:
 
 ```
-imprint/
+src/imprint/
 ├── __init__.py          # Package metadata and version
 ├── __main__.py          # python -m imprint entry point
-├── constants.py         # Named constants, model registry
-├── config.py            # ConfigManager with typed dataclasses + validation
-├── engine.py            # SorterEngine with Protocol-based DI
-├── events.py            # Typed event system (Enum + dataclass)
-├── logging_setup.py     # QueueHandler + rotating file handler
-├── math_utils.py        # Vectorised cosine distance functions
-└── gui/
-    ├── __init__.py
-    ├── app.py           # Main Application window
-    ├── tooltips.py      # ToolTip widget
-    └── widgets.py       # PathSelector, SettingEntry, ModelSelector
+├── domain/
+│   ├── constants.py     # Named constants, model registry
+│   ├── settings.py      # Typed settings + validation
+│   └── math.py          # Vectorised cosine distance functions
+├── engine/
+│   ├── __init__.py      # Public engine exports
+│   └── legacy.py        # v5 engine retained as a parity fixture
+├── events/
+│   ├── __init__.py      # Public event exports
+│   └── types.py         # Typed event system (Enum + dataclass)
+├── platform/
+│   ├── config.py        # ConfigManager (same INI contract)
+│   └── logging.py       # QueueHandler + rotating file handler
+└── ui/                  # v6 PySide6/QML interface
+    ├── app.py           # Qt bootstrap and QML loader
+    ├── bridge.py        # Qt properties, models, worker thread
+    └── qml/             # Main window and themed components
 ```
+
+Import paths such as `imprint.config`, `imprint.constants`, `imprint.events`,
+`imprint.math_utils`, and `imprint.logging_setup` remain available as
+compatibility shims for downstream integrations.
 
 ### Design Principles
 
-- **Thread safety** — All GUI updates routed through `self.after()` via event queues. Zero Tkinter calls from worker threads.
+- **Thread safety** — The Qt worker emits typed pipeline events through queued signals; all UI mutations happen on the main thread.
 - **Dependency injection** — `SorterEngine` accepts a `FaceAnalyser` Protocol, enabling GPU-free unit testing with mocks.
 - **Typed events** — `EngineEvent` dataclass with `EventType` enum replaces magic strings.
 - **Validation** — Path overlap detection, range checking, and type validation before analysis starts.
@@ -177,29 +191,96 @@ python -m pytest tests/ --cov=imprint --cov-report=term-missing
 ### Linting
 
 ```bash
-ruff check imprint/ tests/
+ruff check src/imprint/ tests/
 ```
+
+## Packaging (Windows)
+
+The v6 Windows bundle is built with PyInstaller and wrapped in an Inno Setup installer.
+
+```bash
+# One-time setup
+pip install -r requirements-build.txt
+winget install --id JRSoftware.InnoSetup -e
+
+# Optional: prefetch the InsightFace model packs
+python scripts/prefetch_models.py
+
+# Build the one-directory application
+powershell -ExecutionPolicy Bypass -File scripts/build_app.ps1
+
+# Build the installer
+powershell -ExecutionPolicy Bypass -File scripts/build_installer.ps1
+```
+
+Outputs:
+
+- `dist/Imprint/Imprint.exe` — one-directory application bundle
+- `dist/installer/Imprint-6.0.0-Setup.exe` — per-user installer (no administrator rights required)
+
+The packaging job also runs in GitHub Actions via `.github/workflows/package.yml`.
+The packaged app accepts `--self-test`, which imports the critical runtime pieces and
+returns a non-zero exit code if the bundle is incomplete.
+
+The PyInstaller spec prunes unused Qt Quick style DLLs and unused Python packages,
+reducing the unpacked application by roughly 47 MB and the installer by roughly 23 MB
+(565 MB -> 542 MB) while preserving the full feature set.
+
+> **Python 3.12 note:** InsightFace 0.7.3 publishes no cp312 wheel. The repository vendors
+> a locally built Windows wheel in `wheelhouse/` (MinGW-w64, runtime DLLs bundled), so the
+> application and packaging builds do not require a compiler. See
+> [`wheelhouse/README.md`](wheelhouse/README.md) for provenance and rebuild steps.
+>
+> The Python 3.12 lockfile passes `pip-audit -r requirements.lock`.
+
+## Performance
+
+The pipeline benchmark uses a deterministic fake analyser, so it measures decoding,
+copying, cache, and orchestration overhead without requiring a GPU:
+
+```bash
+python scripts/benchmark_engine.py --images 1000 --inference-ms 2
+```
+
+Sample development-machine result with 1,000 generated images:
+
+```text
+v5 engine:            3.697s
+v6 cold cache:        4.000s
+v6 warm cache:        0.978s (1000 cache hits)
+Cache speedup:        4.09x
+Python peak memory:   2.5 MiB
+```
+
+With larger 256x256 images the overlapped decoder also beats the sequential v5
+pipeline on a cold run (1.181s versus 1.358s for 300 images).
 
 ## Project Files
 
 | File | Purpose |
 |---|---|
-| `run.py` | Convenience entry point for `start.bat` |
+| `run.py` | Entry point for `start.bat` and the QML application |
 | `start.bat` | Smart Windows launcher with auto-setup |
 | `pyproject.toml` | Modern Python packaging metadata |
 | `requirements.txt` | Pinned production dependencies |
 | `requirements-dev.txt` | Development/test dependencies |
+| `requirements-build.txt` | Packaging dependencies (PyInstaller) |
+| `wheelhouse/` | Vendored cp312 InsightFace wheel and provenance |
+| `packaging/` | PyInstaller spec, icon, version info, Inno Setup script |
+| `scripts/` | Build, installer, and model-prefetch scripts |
 | `.gitignore` | Excludes venv, config, caches, logs |
-| [`decisions.md`](decisions.md) | Architectural & testing decisions rationale |
+| `CHANGELOG.md` | Release history |
+| [`docs/MIGRATION.md`](docs/MIGRATION.md) | Upgrade notes from v5 |
+| [`decisions.md`](decisions.md) | Historical v5 architectural decisions |
 
 ## Tech Stack
 
 | Component | Technology |
 |---|---|
-| **Language** | Python 3.9+ |
+| **Language** | Python 3.12 |
 | **Face Analysis** | InsightFace |
 | **GPU Runtime** | ONNX Runtime (CUDA) |
-| **GUI** | Tkinter + ttk |
+| **GUI** | PySide6 6 + QML |
 | **Image I/O** | OpenCV |
 | **Math** | NumPy, SciPy |
 | **Testing** | pytest |

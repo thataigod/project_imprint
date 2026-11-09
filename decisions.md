@@ -1,5 +1,8 @@
 # Project Imprint Architectural & Testing Decisions
 
+> Historical v5 notes. The v6 architecture and current decisions are documented in
+> [`docs/adr/0001-v6-modern-rewrite.md`](docs/adr/0001-v6-modern-rewrite.md).
+
 This document outlines the key technical decisions taken during the rebuild and enhancement of **Project Imprint (v5)**, documenting the rationale behind each choice for future developers and AI agents.
 
 ---

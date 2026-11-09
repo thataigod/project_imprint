@@ -9,10 +9,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.12"]
 
     steps:
     - uses: actions/checkout@v4
@@ -26,11 +29,13 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1 xvfb
+        sudo apt-get install -y libgl1 libegl1 libxkbcommon-x11-0
         
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install "numpy<2.0" "cython>=3.0" "setuptools<84" wheel
+        pip install --no-build-isolation --no-deps insightface==0.7.3
         pip install -r requirements-dev.txt
 
     - name: Audit dependencies for vulnerabilities
@@ -39,12 +44,12 @@ jobs:
 
     - name: Lint with ruff
       run: |
-        ruff check imprint/ tests/
+        ruff check src/imprint/ tests/ scripts/ packaging/
 
     - name: Run mypy type checker
       run: |
-        mypy imprint/
+        mypy src/imprint/
 
     - name: Run tests with pytest
       run: |
-        xvfb-run -a pytest tests/ -v --cov=imprint --cov-fail-under=100
+        pytest tests/ -v --cov=imprint --cov-fail-under=100
