@@ -11,6 +11,7 @@ build/
 imprint_env/
 venv/
 .venv/
+.venv*/
 
 # IDE
 .vscode/

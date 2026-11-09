@@ -22,6 +22,7 @@ from PySide6.QtCore import (
     QPersistentModelIndex,
     QSettings,
     QSortFilterProxyModel,
+    QStandardPaths,
     Qt,
     QThread,
     QTimer,
@@ -32,7 +33,7 @@ from PySide6.QtCore import (
 from PySide6.QtGui import QDesktopServices
 
 from imprint import __version__
-from imprint.domain.constants import MODEL_REGISTRY
+from imprint.domain.constants import CONFIG_FILENAME, MODEL_REGISTRY
 from imprint.domain.results import ImageStatus, RunSummary
 from imprint.domain.settings import (
     AnalysisSettings,
@@ -313,6 +314,21 @@ class AppBridge(QObject):
         parent: QObject | None = None,
     ) -> None:
         super().__init__(parent)
+        if config_manager is None and config_path is None:
+            config_dir = Path(
+                QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation)
+            )
+            config_dir.mkdir(parents=True, exist_ok=True)
+            config_path = config_dir / CONFIG_FILENAME
+        if log_dir is None:
+            log_dir = (
+                Path(
+                    QStandardPaths.writableLocation(
+                        QStandardPaths.StandardLocation.AppLocalDataLocation
+                    )
+                )
+                / "logs"
+            )
         self._config_manager = config_manager or ConfigManager(config_path)
         self._settings = self._config_manager.load()
         self._qsettings = qsettings or QSettings("Imprint", "Imprint Face Sorter")

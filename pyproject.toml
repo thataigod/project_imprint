@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "imprint-face-sorter"
-version = "5.0.0"
+version = "6.0.0"
 description = "GPU-accelerated desktop application for sorting images based on facial similarity."
 requires-python = ">=3.9,<3.14"
 license = {text = "MIT"}
@@ -31,6 +31,9 @@ dev = [
     "mypy>=1.0.0",
     "pre-commit",
     "pip-audit",
+]
+build = [
+    "pyinstaller>=6.10,<7",
 ]
 
 
@@ -77,5 +80,3 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "tests.*"
 ignore_errors = true
-
-

@@ -109,6 +109,11 @@ QML interface reaches feature parity.
   retains the Tkinter interface during the transition. Existing `config.ini`
   files are loaded directly by the Qt bridge. Legacy removal is deferred until
   the final release.
+- **Phase 5** complete with one blocker: the PyInstaller one-directory build and
+  Inno Setup installer are implemented and verified with Python 3.10.11. The
+  Python 3.12 upgrade is deferred because the local machine lacks the Microsoft
+  C++ Build Tools required to compile InsightFace's mesh extension. The
+  `pip-audit` remediation depends on that runtime upgrade.
 
 ## Verification
 

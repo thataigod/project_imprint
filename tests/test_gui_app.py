@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imprint import __version__
 from imprint.events import EngineEvent, MessageLevel
 from imprint.gui.app import Application
 
@@ -24,7 +25,7 @@ def gui_app():
 
 def test_app_initialization(gui_app: Application) -> None:
     """Verify the app initializes correctly."""
-    assert gui_app.title() == "Imprint Face Sorter v5.0.0"
+    assert gui_app.title() == f"Imprint Face Sorter v{__version__}"
     assert str(gui_app._run_button.cget("state")) == "normal"
     assert str(gui_app._cancel_button.cget("state")) == "disabled"
 

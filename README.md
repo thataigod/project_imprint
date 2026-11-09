@@ -25,16 +25,18 @@ A high-performance, GPU-accelerated desktop application for sorting images based
 | **OS** | Windows 10 / 11 |
 | **GPU** | NVIDIA with CUDA support |
 | **Python** | 3.9 or later, added to PATH |
-| **CUDA Toolkit** | Version 11.x (11.8 recommended) |
-| **cuDNN** | v8.9.x for CUDA 11.x |
+| **CUDA Toolkit** | Version 12.x (12.8 recommended) |
+| **cuDNN** | 9.x for CUDA 12.x |
 
 ## Setup & Installation
 
 ### 1. Install CUDA and cuDNN (one-time)
 
-1. Install the [NVIDIA CUDA Toolkit v11.8](https://developer.nvidia.com/cuda-11-8-0-download-archive) using the "Express" option.
-2. Download [cuDNN v8.9.7 for CUDA 11.x](https://developer.nvidia.com/rdp/cudnn-archive).
-3. Unzip cuDNN and copy the contents of `bin/`, `include/`, and `lib/` into your CUDA installation directory (e.g. `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8`).
+1. Install the [NVIDIA CUDA Toolkit 12.x](https://developer.nvidia.com/cuda-downloads) using the "Express" option.
+2. Download [cuDNN 9.x for CUDA 12.x](https://developer.nvidia.com/cudnn).
+3. Unzip cuDNN and copy the contents of `bin/`, `include/`, and `lib/` into your CUDA installation directory (e.g. `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8`).
+
+The packaged application does not bundle the CUDA or cuDNN runtimes; install them on the target machine.
 
 ### 2. Download the Project
 
@@ -196,6 +198,36 @@ python -m pytest tests/ --cov=imprint --cov-report=term-missing
 ruff check src/imprint/ tests/
 ```
 
+## Packaging (Windows)
+
+The v6 Windows bundle is built with PyInstaller and wrapped in an Inno Setup installer.
+
+```bash
+# One-time setup
+pip install -r requirements-build.txt
+winget install --id JRSoftware.InnoSetup -e
+
+# Optional: prefetch the InsightFace model packs
+python scripts/prefetch_models.py
+
+# Build the one-directory application
+powershell -ExecutionPolicy Bypass -File scripts/build_app.ps1
+
+# Build the installer
+powershell -ExecutionPolicy Bypass -File scripts/build_installer.ps1
+```
+
+Outputs:
+
+- `dist/Imprint/Imprint.exe` — one-directory application bundle
+- `dist/installer/Imprint-6.0.0-Setup.exe` — per-user installer (no administrator rights required)
+
+The packaging job also runs in GitHub Actions via `.github/workflows/package.yml`.
+
+> **Runtime note:** the verified local build uses Python 3.10.11. The planned Python 3.12
+> upgrade and the remaining `pip-audit` remediation are deferred until the Microsoft C++
+> Build Tools are available for the InsightFace extension build.
+
 ## Project Files
 
 | File | Purpose |
@@ -205,6 +237,9 @@ ruff check src/imprint/ tests/
 | `pyproject.toml` | Modern Python packaging metadata |
 | `requirements.txt` | Pinned production dependencies |
 | `requirements-dev.txt` | Development/test dependencies |
+| `requirements-build.txt` | Packaging dependencies (PyInstaller) |
+| `packaging/` | PyInstaller spec, icon, version info, Inno Setup script |
+| `scripts/` | Build, installer, and model-prefetch scripts |
 | `.gitignore` | Excludes venv, config, caches, logs |
 | [`decisions.md`](decisions.md) | Architectural & testing decisions rationale |
 

@@ -1,0 +1,6 @@
+# requirements-build.txt - Packaging Dependencies
+# Install with: pip install -r requirements-build.txt
+
+-r requirements-dev.txt
+
+pyinstaller>=6.10,<7

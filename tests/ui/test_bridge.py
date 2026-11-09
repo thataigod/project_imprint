@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from PySide6.QtCore import QSettings, QUrl
+from PySide6.QtCore import QSettings, QStandardPaths, QUrl
 
 from imprint.domain.results import ImageStatus, RunSummary
 from imprint.domain.settings import AnalysisSettings, PathSettings
@@ -84,6 +84,25 @@ def configure_valid_folders(bridge: AppBridge, tmp_path: Path) -> None:
     bridge.referenceFolder = str(tmp_path / "reference")
     bridge.sourceFolder = str(tmp_path / "source")
     bridge.destinationFolder = str(tmp_path / "destination")
+
+
+def test_default_user_paths(tmp_path: Path, qapp, monkeypatch) -> None:
+    def fake_location(location: QStandardPaths.StandardLocation) -> str:
+        if location == QStandardPaths.StandardLocation.AppConfigLocation:
+            return str(tmp_path / "config")
+        return str(tmp_path / "data")
+
+    monkeypatch.setattr(
+        "imprint.ui.bridge.QStandardPaths.writableLocation",
+        fake_location,
+    )
+    settings = QSettings(str(tmp_path / "ui.ini"), QSettings.Format.IniFormat)
+    loaded = AppBridge(qsettings=settings)
+    try:
+        assert (tmp_path / "config" / "config.ini").exists()
+        assert (tmp_path / "data" / "logs" / "imprint.log").exists()
+    finally:
+        loaded.shutdown()
 
 
 class TestFoldersAndSettings:

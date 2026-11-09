@@ -39,7 +39,7 @@ jobs:
 
     - name: Lint with ruff
       run: |
-        ruff check src/imprint/ tests/
+        ruff check src/imprint/ tests/ scripts/ packaging/
 
     - name: Run mypy type checker
       run: |
