@@ -13,4 +13,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 from imprint.__main__ import main  # noqa: E402
 
 if __name__ == "__main__":
+    if "--qml" in sys.argv:
+        from imprint.ui.app import main as qml_main  # noqa: PLC0415
+
+        sys.argv.remove("--qml")
+        raise SystemExit(qml_main())
     main()

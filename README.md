@@ -2,7 +2,15 @@
 
 A high-performance, GPU-accelerated desktop application for sorting images based on facial similarity. Powered by state-of-the-art face recognition models, Imprint automatically identifies faces in your photos and organises them into scored subdirectories with a single click.
 
-> **v6 modernization in progress** — this branch moves the package to a `src/` layout and prepares the PySide6/QML rewrite. The Tkinter application remains fully functional during the transition. See [`docs/adr/0001-v6-modern-rewrite.md`](docs/adr/0001-v6-modern-rewrite.md).
+> **v6 modernization in progress** — this branch moves the package to a `src/` layout and adds the PySide6/QML interface. The Tkinter application remains fully functional during the transition. See [`docs/adr/0001-v6-modern-rewrite.md`](docs/adr/0001-v6-modern-rewrite.md).
+>
+> **Preview the QML interface** from an activated environment with:
+>
+> ```bash
+> python run.py --qml
+> ```
+>
+> `start.bat` still launches the legacy Tkinter interface until the Phase 4 cutover.
 
 ## Features
 
@@ -148,7 +156,10 @@ src/imprint/
 │   ├── config.py        # ConfigManager (same INI contract)
 │   └── logging.py       # QueueHandler + rotating file handler
 ├── gui/                 # Legacy Tkinter interface
-└── ui/                  # v6 PySide6/QML interface (placeholder)
+└── ui/                  # v6 PySide6/QML interface
+    ├── app.py           # Qt bootstrap and QML loader
+    ├── bridge.py        # Qt properties, models, worker thread
+    └── qml/             # Main window and themed components
 ```
 
 Legacy import paths such as `imprint.config`, `imprint.constants`,
@@ -208,7 +219,7 @@ ruff check src/imprint/ tests/
 | **Language** | Python 3.9+ |
 | **Face Analysis** | InsightFace |
 | **GPU Runtime** | ONNX Runtime (CUDA) |
-| **GUI** | Tkinter + ttk |
+| **GUI** | PySide6 6 + QML (v6), Tkinter + ttk (legacy) |
 | **Image I/O** | OpenCV |
 | **Math** | NumPy, SciPy |
 | **Testing** | pytest |

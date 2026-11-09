@@ -42,6 +42,7 @@ class AnalysisSettings:
         confidence_threshold: Min face-detection confidence (0.0-1.0).
         batch_size: Images per progress-update group.
         number_of_subfolders: Tiered output subdirectory count.
+        cache_enabled: Reuse embeddings from the SQLite cache.
     """
 
     model_name: str = DEFAULT_MODEL
@@ -49,6 +50,7 @@ class AnalysisSettings:
     confidence_threshold: float = 0.85
     batch_size: int = 8
     number_of_subfolders: int = 10
+    cache_enabled: bool = True
 
 
 @dataclass

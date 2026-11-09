@@ -96,6 +96,18 @@ QML interface reaches feature parity.
 4. `uv` lockfile, PyInstaller build, installer, model prefetch, clean-machine test.
 5. Coverage, GPU smoke tests, performance benchmark, documentation, legacy removal.
 
+## Implementation Status
+
+- **Phase 0** complete: ADR, stack decisions, and parity scope approved.
+- **Phase 1** complete: `src/` layout, domain/events/platform packages, shims, and tooling.
+- **Phase 2** complete: `EngineV6`, overlapped decoding, SQLite cache, pause/cancel,
+  rich events, and a legacy-versus-v6 parity harness.
+- **Phase 3** complete: PySide6/QML interface, Qt bridge, live results grid, settings,
+  drag-and-drop folder cards, activity log, summary, themes, and worker lifecycle.
+  The QML interface is previewable with `python run.py --qml`.
+- **Phase 4** next: make the QML interface the default entry point and retire the
+  legacy Tkinter path after final parity verification.
+
 ## Verification
 
 - A parity harness runs the legacy and new engines over the same fixture set and

@@ -107,6 +107,14 @@ class TestConfigManager:
         defaults = AppSettings()
         assert settings.analysis.model_name == defaults.analysis.model_name
         assert settings.analysis.distance_threshold == defaults.analysis.distance_threshold
+        assert settings.analysis.cache_enabled is True
+
+    def test_malformed_bool_uses_default(self, tmp_path: Path) -> None:
+        """Malformed booleans should fall back to the default."""
+        config_path = tmp_path / "config.ini"
+        config_path.write_text("[Settings]\ncache_enabled = perhaps\n", encoding="utf-8")
+        settings = ConfigManager(filepath=config_path).load()
+        assert settings.analysis.cache_enabled is True
 
 
 class TestValidateAnalysisSettings:

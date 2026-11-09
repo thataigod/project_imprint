@@ -99,6 +99,11 @@ class ConfigManager:
                 "number_of_subfolders",
                 defaults.analysis.number_of_subfolders,
             ),
+            cache_enabled=self._get_bool(
+                self._SECTION_SETTINGS,
+                "cache_enabled",
+                defaults.analysis.cache_enabled,
+            ),
         )
 
         return AppSettings(paths=paths, analysis=analysis)
@@ -122,6 +127,7 @@ class ConfigManager:
                     "confidence_threshold": str(settings.analysis.confidence_threshold),
                     "batch_size": str(settings.analysis.batch_size),
                     "number_of_subfolders": str(settings.analysis.number_of_subfolders),
+                    "cache_enabled": str(settings.analysis.cache_enabled),
                 },
             }
         )
@@ -148,5 +154,12 @@ class ConfigManager:
         """Read an int value with fallback."""
         try:
             return self._parser.getint(section, key)
+        except (configparser.NoSectionError, configparser.NoOptionError, ValueError):
+            return default
+
+    def _get_bool(self, section: str, key: str, default: bool) -> bool:
+        """Read a boolean value with fallback."""
+        try:
+            return self._parser.getboolean(section, key)
         except (configparser.NoSectionError, configparser.NoOptionError, ValueError):
             return default

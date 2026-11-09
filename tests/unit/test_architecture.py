@@ -73,6 +73,7 @@ def test_v5_config_keys_are_preserved(tmp_path: Path) -> None:
         "confidence_threshold",
         "batch_size",
         "number_of_subfolders",
+        "cache_enabled",
     }
     assert parser["Settings"]["model_name"] == "buffalo_l"
     assert parser["Paths"]["reference_folder"] == "/ref"
